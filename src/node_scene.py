@@ -4,7 +4,8 @@ class Scene:
 
 	def __init__(self):
 		self.nodes = []
-		self.edges = []
+		self.pins = []
+		self.connections = []
 
 		self.width = 128000
 		self.height = 64000
@@ -18,11 +19,17 @@ class Scene:
 	def addNode(self, node):
 		self.nodes.append(node)
 
-	def addEdge(self, edge):
-		self.edges.append(edges)
+	def addConnection(self, edge):
+		self.connections.append(edge)
+
+	def addPin(self, pin):
+		self.pins.append(pin)
 
 	def removeNode(self, node):
 		self.nodes.remove(node)
 
-	def removeEdge(self, edge):
-		self.edges.remove(edges)
+	def removeConnection(self, edge):
+		self.connections.remove(edge)
+
+	def removePin(self, pin):
+		self.pins.remove(pin)

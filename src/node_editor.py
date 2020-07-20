@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from node import Node
+from node_connection import Connection
 from node_scene import Scene
 from node_editor_scene import QNEGraphicsScene
 from node_editor_viewport import QNEGraphicsView
@@ -26,34 +27,32 @@ class NodeEditorWindow(QWidget):
 		self.scene = Scene()
 		self.graphScene = self.scene.graphScene
 
-		
 
 		# create viewport
 		self.view = QNEGraphicsView(self.graphScene, self)
 		self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 		self.view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+		self.view.setMouseTracking(True)
+
 		self.layout.addWidget(self.view)
 
-		# self.addDebugContent()
+		self.addDebugContent()
 
 		self.show()
 
 	def spawnNode(self, *args, **argv):
 		Node(self.scene, *args, **argv)
 
+	def spawnConnection(self, first, second, *args, **argv):
+		# Node(self.scene, *args, **argv)
+		Connection(self.scene, first, second)
 
 
 	def addDebugContent(self):
-		outlinePen = QPen(Qt.black)
-		outlinePen.setWidth(2)
-
-		greenBrush = QBrush(Qt.green)
-
-		rect = self.graphScene.addRect(-100, -100, 80, 100, outlinePen, greenBrush)
-		rect.setFlag(QGraphicsItem.ItemIsMovable)
-
-		text = self.graphScene.addText('Node', QFont('Monaco'))
-		text.setFlag(QGraphicsItem.ItemIsSelectable)
+		self.spawnNode(QPoint(-200, -10), title='Batch Norm')
+		self.spawnNode(QPoint(-200, -200), title='Batch Norm')
+		self.spawnNode(QPoint(200, 10), title='Batch Norm')
+		# self.spawnConnection()
 
 	def contextMenuEvent(self, event):
 		contextMenu = QMenu(self)

@@ -1,8 +1,10 @@
+from global_vars import GLOBALS
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from settings import *
 from node import Node
+from node_pin import *
 
 class QNEGraphicsView(QGraphicsView):
 
@@ -16,11 +18,20 @@ class QNEGraphicsView(QGraphicsView):
 		self.initUI()
 		self.setScene(self.scene)
 
-
 	def initUI(self):
 		self.setRenderHints(QPainter.Antialiasing | QPainter.HighQualityAntialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform)
 		self.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
 		self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
+
+	def mouseMoveEvent(self, event):
+		super().mouseMoveEvent(event)
+		GLOBALS.mouse_pos = self.mapFromScene(event.pos()) - QPoint(800, 600)
+		# GLOBALS.mouse_pos.setY(-GLOBALS.mouse_pos.y())
+		if GLOBALS.mose_pressed:
+			for i in range(len(self.parent.scene.connections)):
+				self.parent.scene.connections[i].graphConnection.avoid_whiteList = []
+		for i in range(len(self.parent.scene.connections)):
+			self.parent.scene.connections[i].graphConnection.update()
 
 	def mousePressEvent(self, event):
 		if event.button() == Qt.MiddleButton:
@@ -33,24 +44,67 @@ class QNEGraphicsView(QGraphicsView):
 			super().mousePressEvent(event)
 
 	def mouseReleaseEvent(self, event):
-		if event == Qt.MiddleButton:
-			self.mouseWheelPrReleased(event)
-		elif event == Qt.LeftButton:
+		if event.button() == Qt.MiddleButton:
+			self.mouseWheelReleased(event)
+		elif event.button() == Qt.LeftButton:
 			self.mouseLeftReleased(event)
-		elif event == Qt.RightButton:
+		elif event.button() == Qt.RightButton:
 			self.mouseRightReleased(event)
 		else:
 			super().mouseReleaseEvent(event)
 
 	def mouseLeftPressed(self, event):
 		super().mousePressEvent(event)
+		print('asadsa')
+		GLOBALS.mose_pressed = True
+		for i in range(len(self.parent.scene.connections)):
+			self.parent.scene.connections[i].graphConnection.updateSelection()
+			# self.parent.scene.connections[i].graphConnection.avoid_whiteList = []
+
+		for pin in self.parent.scene.pins:
+			if not pin.position in [RIGHT_TOP, RIGHT_BOTTOM]: # only outputs are accepted
+				continue
+
+			pin.graphPin.update()
+			if pin.graphPin.isSelected():
+				GLOBALS.dragged_pin = pin
+				GLOBALS.start_drag = True
+				GLOBALS.temp_connection_id = len(self.parent.scene.connections)
+				self.parent.spawnConnection(pin, None)
 
 	def mouseLeftReleased(self, event):
 		super().mouseReleaseEvent(event)
+		GLOBALS.mose_pressed = False
+		if GLOBALS.start_drag:
+
+			for pin in self.parent.scene.pins:
+				bbox = pin.graphPin.boundingRect()
+				
+				_pos = pin.graphPin.pos() # local in-node coordiantes
+				_pos += pin.node.graphNode.pos()
+
+				bbox.setX(_pos.x()-pin_radius)
+				bbox.setY(_pos.y()-pin_radius)
+				bbox.setWidth(pin_radius*2)
+				bbox.setHeight(pin_radius*2)
+
+				if bbox.contains(GLOBALS.mouse_pos.x(), GLOBALS.mouse_pos.y()):
+					GLOBALS.target_pin = pin
+
+			if GLOBALS.target_pin is None: # nothing selected as target, delete connection
+				self.scene.removeItem(self.parent.scene.connections[GLOBALS.temp_connection_id].graphConnection)
+				del self.parent.scene.connections[GLOBALS.temp_connection_id]
+			else:
+				self.parent.scene.connections[GLOBALS.temp_connection_id].second_pin = GLOBALS.target_pin
+
+			GLOBALS.temp_connection_id = -1
+			GLOBALS.target_pin = None
+			GLOBALS.dragged_pin = None
+			GLOBALS.start_drag = False
 
 	def mouseRightPressed(self, event):
 		super().mousePressEvent(event)
-		
+
 	def mouseRightReleased(self, event):
 		super().mouseReleaseEvent(event)
 

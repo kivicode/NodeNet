@@ -28,8 +28,8 @@ class QNEGraphicsNode(QGraphicsItem):
 		return QRectF(
 			0,
 			0,
-			2 * node_border_radius + node_width,
-			2 * node_title_color + self.height
+			node_border_radius + node_width,
+			node_title_color + self.height
 		).normalized()
 
 	def paint(self, painter, _, widget=None, **argv):
