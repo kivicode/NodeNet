@@ -20,7 +20,11 @@ class Scene:
 		self.nodes.append(node)
 
 	def addConnection(self, edge):
+		edge.first_pin.connections.append(edge)
+		if edge.second_pin is not None:
+			edge.second_pin.connections.append(edge)
 		self.connections.append(edge)
+		self.graphScene.addItem(edge.graphConnection)
 
 	def addPin(self, pin):
 		self.pins.append(pin)
@@ -30,6 +34,7 @@ class Scene:
 
 	def removeConnection(self, edge):
 		self.connections.remove(edge)
+		self.graphScene.removeItem(edge.graphConnection)
 
 	def removePin(self, pin):
 		self.pins.remove(pin)

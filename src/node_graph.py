@@ -75,6 +75,7 @@ class QNEGraphicsNode(QGraphicsItem):
 
 	@property
 	def height(self):
-		return node_title_height + node_pin_height * max(len(self._node.inputs), len(self._node.outputs))
+		N = max(len(self._node.inputs), len(self._node.outputs))
+		return node_title_height + node_pin_height * N + (pin_spacing/2 if N == 1 else pin_up_padding)
 
 	

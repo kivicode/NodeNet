@@ -36,17 +36,22 @@ node_pin_height = 25
 node_border_radius = 10.
 
 pin_brush = QBrush(QColor(244, 191, 117))
-pin_radius = 6.
+pin_layer_brush = QBrush(QColor(201, 236, 124))
+pin_radius = 6.5
 pin_hspacing = -3
 pin_spacing  = 22
 pin_up_padding = 5
 pin_value_background = QBrush(QColor(48, 48, 48))
+pin_output_font_color = QColor(90, 90, 90)
 
 connection_pen = QPen(QColor(244, 191, 117))
 connection_pen.setWidth(4)
+connection_layer_pen = QPen(QColor(201, 236, 124))
+connection_layer_pen.setWidth(4)
 connection_selected_pen = QPen(QColor(255, 255, 163))
 connection_selected_pen.setWidth(4)
 connection_shift_ratio = 6
+connection_shift = 0
 
 wire_skip_size = 15
 draw_skips = False

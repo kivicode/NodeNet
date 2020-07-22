@@ -1,3 +1,4 @@
+from global_vars import GLOBALS
 from PyQt5.QtWidgets import *
 import sys
 
@@ -7,5 +8,6 @@ if __name__ == '__main__':
 	app = QApplication(sys.argv)
 
 	window = NodeEditorWindow()
+	GLOBALS.main_window = window
 
 	sys.exit(app.exec_())

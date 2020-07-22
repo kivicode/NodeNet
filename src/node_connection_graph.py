@@ -25,8 +25,8 @@ class QNEGraphicsConnection(QGraphicsItem):
 
 
 	def paint(self, painter, _, widget=None, **argv):
-
-		painter.setPen(connection_pen if not self.isSelected() else connection_selected_pen)
+		constant_pen = connection_pen if not self.isSelected() else connection_selected_pen
+		painter.setPen(connection_layer_pen if self.connection.first_pin.graphPin.is_layer_output else constant_pen)
 		painter.setBrush(Qt.NoBrush)
 
 		painter.drawPath(self.path())
@@ -46,7 +46,7 @@ class QNEGraphicsConnection(QGraphicsItem):
 		start_pos = QPoint(*self.connection.first_pin.node.getNodePosition(start_pin_id, \
 		                                                                   start_pin_alignment)) # local in-node coordiantes
 		start_pos += self.connection.first_pin.node.pos # global coordinates mapping
-		start_pos += QPoint(pin_radius + (2 if self.isSelected() else 0), 0) # true alignment
+		start_pos += QPoint(2 if self.isSelected() else 0, 0) # true alignment
 
 		if self.connection.second_pin is not None:
 			end_pos = self.connection.second_pin.graphPin.pos() # local in-node coordiantes
@@ -64,8 +64,8 @@ class QNEGraphicsConnection(QGraphicsItem):
 		delta = end_pos - start_pos
 		shift = 30
 
-		points = [QPoint(start_pos.x() + shift, start_pos.y()), \
-		          QPoint(end_pos.x() - shift, end_pos.y()),
+		points = [QPoint(start_pos.x() + connection_shift, start_pos.y()), \
+		          QPoint(end_pos.x() - connection_shift, end_pos.y()),
 		          end_pos
 		]
 

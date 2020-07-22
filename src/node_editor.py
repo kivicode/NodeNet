@@ -7,6 +7,7 @@ from node_scene import Scene
 from node_editor_scene import QNEGraphicsScene
 from node_editor_viewport import QNEGraphicsView
 from settings import *
+from global_vars import *
 
 class NodeEditorWindow(QWidget):
 
@@ -27,7 +28,6 @@ class NodeEditorWindow(QWidget):
 		self.scene = Scene()
 		self.graphScene = self.scene.graphScene
 
-
 		# create viewport
 		self.view = QNEGraphicsView(self.graphScene, self)
 		self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -44,14 +44,14 @@ class NodeEditorWindow(QWidget):
 		Node(self.scene, *args, **argv)
 
 	def spawnConnection(self, first, second, *args, **argv):
-		# Node(self.scene, *args, **argv)
 		Connection(self.scene, first, second)
 
 
 	def addDebugContent(self):
-		self.spawnNode(QPoint(-200, -10), title='Batch Norm')
-		self.spawnNode(QPoint(-200, -200), title='Batch Norm')
-		self.spawnNode(QPoint(200, 10), title='Batch Norm')
+		self.spawnNode(QPoint(0, 0), title='Batch Norm')
+		# self.spawnNode(QPoint(-200, -200), title='Batch Norm')
+		# self.spawnNode(QPoint(200, 10), title='Batch Norm')
+		self.scene.nodes[0].buildFromFile('test_node.node')
 		# self.spawnConnection()
 
 	def contextMenuEvent(self, event):
@@ -80,8 +80,7 @@ class NodeEditorWindow(QWidget):
 		contextMenu.addMenu(mathMenu)
 
 		action = contextMenu.exec_(self.mapToGlobal(event.pos()))
-		pos = self.view.mapFromScene(event.pos()) - QPoint(1000, 800) # centerize
-		pos += 10 * QPoint(grid_size, grid_size)
+		pos = GLOBALS.mouse_pos # centerize
 
 		if action == spawn_const:
 			self.spawnNode(pos, title='Constant')		
