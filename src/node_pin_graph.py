@@ -55,8 +55,12 @@ class QNEGraphicsPin(QGraphicsItem):
 			self.edit_item.setZValue(-1)
 			self.edit_item.setFont(node_title_font)
 			self.edit_item.setPlainText(self._title)
-			self.edit_item.setPos(self.gNode._pin_x + self.title_x, node_title_hpadding - node_title_font.pointSize()*1.5)
-			self.edit_item.setTextWidth(self.gNode.width - self.gNode._pin_x - pin_editor_margin * 1.6)
+			x = self.gNode._pin_x + self.title_x
+			width = self.gNode.width - self.gNode._pin_x - pin_editor_margin * 1.6
+			if not self.is_input:
+				x = -width - round(12)#pin_editor_margin / 1.66)
+			self.edit_item.setPos(x, node_title_hpadding - node_title_font.pointSize()*1.5)
+			self.edit_item.setTextWidth(width)
 
 		if self.title_item is None:
 			self.title_item = QGraphicsTextItem(self)

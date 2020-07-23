@@ -1,2 +1,1 @@
-a = input('input')
-b = input('inl;kad;skfs;dflks;ldfk;sldfk;sldkflasdput 2', 'layer')
+c = input(' ', 'const', 12) # declorated as input in order to let user change the value
