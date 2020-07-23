@@ -1,2 +1,2 @@
-input('input')
-input('input 2', 'layer')
+a = input('input')
+b = input('inl;kad;skfs;dflks;ldfk;sldfk;sldkflasdput 2', 'layer')

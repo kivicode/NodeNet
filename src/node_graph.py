@@ -9,6 +9,8 @@ class QNEGraphicsNode(QGraphicsItem):
 		super().__init__(parent)
 		self._node = node
 		self._title = title
+		self.width = node_width
+		self._pin_x = 40
 		self.initTitle()
 		self.initUI()
 
@@ -18,7 +20,7 @@ class QNEGraphicsNode(QGraphicsItem):
 		self.title_item.setFont(node_title_font)
 		self.title_item.setPlainText(self._title)
 		self.title_item.setPos(node_title_vpadding, node_title_hpadding)
-		self.title_item.setTextWidth(node_width - 2 * node_title_vpadding)
+		self.title_item.setTextWidth(self.width - 2 * node_title_vpadding)
 
 	def initUI(self):
 		self.setFlag(QGraphicsItem.ItemIsSelectable)
@@ -28,7 +30,7 @@ class QNEGraphicsNode(QGraphicsItem):
 		return QRectF(
 			0,
 			0,
-			node_border_radius + node_width,
+			node_border_radius + self.width,
 			node_title_color + self.height
 		).normalized()
 
@@ -38,9 +40,9 @@ class QNEGraphicsNode(QGraphicsItem):
 		shift = 1 if max(len(self._node.inputs), len(self._node.outputs)) == 0 else 0
 		path_title = QPainterPath()
 		path_title.setFillRule(Qt.WindingFill)
-		path_title.addRoundedRect(0, 0, node_width, node_title_height, node_border_radius, node_border_radius)
+		path_title.addRoundedRect(0, 0, self.width, node_title_height, node_border_radius, node_border_radius)
 		path_title.addRect(-shift, node_title_height - node_border_radius + shift, node_border_radius, node_border_radius)
-		path_title.addRect(node_width - node_border_radius + shift, node_title_height - node_border_radius + shift, node_border_radius, node_border_radius)
+		path_title.addRect(self.width - node_border_radius + shift, node_title_height - node_border_radius + shift, node_border_radius, node_border_radius)
 		painter.setPen(Qt.NoPen)
 		painter.setBrush(node_title_brush)
 		painter.drawPath(path_title.simplified())
@@ -49,9 +51,9 @@ class QNEGraphicsNode(QGraphicsItem):
 		shift = 1 if max(len(self._node.inputs), len(self._node.outputs)) == 0 else 0
 		path_body = QPainterPath()
 		path_body.setFillRule(Qt.WindingFill)
-		path_body.addRoundedRect(0, node_title_height, node_width, self.height - node_title_height, node_border_radius, node_border_radius)
+		path_body.addRoundedRect(0, node_title_height, self.width, self.height - node_title_height, node_border_radius, node_border_radius)
 		path_body.addRect(-shift, node_title_height + shift, node_border_radius, node_border_radius)
-		path_body.addRect(node_width - node_border_radius + shift, node_title_height + shift, node_border_radius, node_border_radius)
+		path_body.addRect(self.width - node_border_radius + shift, node_title_height + shift, node_border_radius, node_border_radius)
 		painter.setPen(Qt.NoPen)
 		painter.setBrush(node_body_brush)
 		painter.drawPath(path_body.simplified())
@@ -60,7 +62,7 @@ class QNEGraphicsNode(QGraphicsItem):
 
 		# outline
 		path_outline = QPainterPath()
-		path_outline.addRoundedRect(0, 0, node_width, self.height, node_border_radius, node_border_radius)
+		path_outline.addRoundedRect(0, 0, self.width, self.height, node_border_radius, node_border_radius)
 		painter.setPen(node_default_pen if not self.isSelected() else node_selected_pen)
 		painter.setBrush(Qt.NoBrush)
 		painter.drawPath(path_outline.simplified())

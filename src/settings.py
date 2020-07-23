@@ -41,6 +41,7 @@ pin_radius = 6.5
 pin_hspacing = -3
 pin_spacing  = 22
 pin_up_padding = 5
+pin_editor_margin = 20
 pin_value_background = QBrush(QColor(48, 48, 48))
 pin_output_font_color = QColor(90, 90, 90)
 
@@ -51,7 +52,7 @@ connection_layer_pen.setWidth(4)
 connection_selected_pen = QPen(QColor(255, 255, 163))
 connection_selected_pen.setWidth(4)
 connection_shift_ratio = 6
-connection_shift = 0
+connection_shift = 10
 
 wire_skip_size = 15
 draw_skips = False

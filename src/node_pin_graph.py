@@ -15,7 +15,11 @@ class QNEGraphicsPin(QGraphicsItem):
 		self.is_input = is_input
 		self.is_layer_output = is_layer_output
 		self.is_dublicate = is_dublicate
-
+		self.title_item = None
+		self.edit_item = None
+		self.gNode = self._pin.node.graphNode
+		self.title_x = 0
+		self.initSizes()
 		self.initUI()
 
 
@@ -24,47 +28,65 @@ class QNEGraphicsPin(QGraphicsItem):
 		self.setFlag(QGraphicsItem.ItemIsFocusable)
 		self.initTitle()
 
+	def initSizes(self):
+		fm = QFontMetrics(node_title_font)
+
+		# print(, 12 * len(self._title))
+		self.width = fm.width(self._title) + node_width + pin_editor_margin
+		self.gNode.width = max(self.gNode.width, self.width)
+		self.gNode._pin_x = max(self.gNode._pin_x, self.width - node_width)
+		# self.initTitle()
+
 	def initTitle(self):
-		self.width = 12 * len(self._title)
 		if self.is_input:
-			title_x = node_title_vpadding + node_title_xshift
+			self.title_x = node_title_vpadding + node_title_xshift
 		else:
-			title_x = node_title_vpadding + node_title_xshift - node_width
+			self.title_x = node_title_vpadding + node_title_xshift - self.width
 
 		if not self.is_dublicate:
-			self.edit_item = QEditableTextItem(self)
+			if self.edit_item is None:
+				self.edit_item = QEditableTextItem(self)
 			if not self.is_layer_output and self.is_input:
 				self.edit_item.setFlag(QGraphicsItem.ItemIsSelectable)
 				self.edit_item.setFlag(QGraphicsItem.ItemIsFocusable)
 				self.edit_item.setDefaultTextColor(node_title_font_color)
 			else:
 				self.edit_item.setDefaultTextColor(pin_output_font_color)
-			self.edit_item.setZValue(100)
+			self.edit_item.setZValue(-1)
 			self.edit_item.setFont(node_title_font)
 			self.edit_item.setPlainText(self._title)
-			self.edit_item.setPos(40 + title_x, node_title_hpadding - node_title_font.pointSize()*1.5)
-			self.edit_item.setTextWidth(node_width - 3 * node_title_vpadding - 40)
+			self.edit_item.setPos(self.gNode._pin_x + self.title_x, node_title_hpadding - node_title_font.pointSize()*1.5)
+			self.edit_item.setTextWidth(self.gNode.width - self.gNode._pin_x - pin_editor_margin * 1.6)
 
-		self.title_item = QGraphicsTextItem(self)
+		if self.title_item is None:
+			self.title_item = QGraphicsTextItem(self)
+		self.title_item.setZValue(2)
 		self.title_item.setDefaultTextColor(node_title_font_color)
 		self.title_item.setFont(node_title_font)
 		self.title_item.setPlainText(self._title)
-		self.title_item.setPos(title_x, node_title_hpadding - node_title_font.pointSize()*1.5)
-		self.title_item.setTextWidth(node_width - 2 * node_title_vpadding)
+		self.title_item.setPos(self.title_x, node_title_hpadding - node_title_font.pointSize()*1.5)
+		self.title_item.setTextWidth(self.width - 2 * node_title_vpadding)
 
 
-	def paint(self, painter, _, widget=None):
+	def paint(self, painter, style, widget=None):
+		# widget.setZValue(1000)
 		painter.setBrush(pin_layer_brush if self.is_layer_output else pin_brush)
 		painter.setPen(node_default_pen)
-		painter.drawEllipse(-pin_radius, -pin_radius, 2 * pin_radius, 2 * pin_radius)
+		painter.drawEllipse(self._getX(), -pin_radius, 2 * pin_radius, 2 * pin_radius)
 
 	def boundingRect(self):
 		return QRectF(
-			- pin_radius,
+			self._getX(),
 			- pin_radius,
 			2 * pin_radius,
 			2 * pin_radius,
 		)
+
+	def _getX(self):
+		x = self.gNode.width-self.pos().x()-pin_radius
+		if self.is_input:
+			x = -pin_radius
+		return x
 
 	def mousePressEvent(self, event):
 		super().mousePressEvent(event)

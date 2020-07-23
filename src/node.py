@@ -31,7 +31,7 @@ class Node:
 		return self.graphNode.pos()
 
 	def getNodePosition(self, index:int, position:int, num_out_of:int=1) -> '(x, y)':
-		x = 0 if (position in (GLOBALS.LEFT_TOP, GLOBALS.LEFT_BOTTOM)) else node_width
+		x = 0 if (position in (GLOBALS.LEFT_TOP, GLOBALS.LEFT_BOTTOM)) else self.graphNode.width
 
 		if position in (GLOBALS.LEFT_BOTTOM, GLOBALS.RIGHT_BOTTOM):
 			# start from bottom
@@ -75,7 +75,10 @@ class Node:
 		else:
 			self.outputs_counter += 1
 			self.outputs.append(pin)
-
+		for io in self.inputs + self.outputs:
+			io.graphPin.initSizes()
+		for io in self.inputs + self.outputs:
+			io.graphPin.initTitle()
 	# def removeInput(self, idx):
 	# 	_input = self.inputs[idx]
 	# 	dublicate_output = self.outputs[idx]
@@ -100,9 +103,12 @@ class Node:
 
 	def buildFromCode(self, code):
 		self.setIOPins([], []) # clear pins
-		inputs_list  = Interpreter.extractInputs(code, target_parent=self)
-		outputs_list = Interpreter.extractOutputs(code, target_parent=self)
-		for io_pin in inputs_list + outputs_list:
-			io_pin.build()
+		inputs_dict  = Interpreter.extractInputs(code, target_parent=self)
+		outputs_dict = Interpreter.extractOutputs(code, target_parent=self)
+		for input_pin in inputs_dict.values():
+			input_pin.build()
+
+		for output_pin in outputs_dict.values():
+			output_pin.build()
 
 

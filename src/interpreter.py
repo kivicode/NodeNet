@@ -4,20 +4,22 @@ import re
 class Interpreter:
 
 	extract_params_regex = r'([^,]+\(.+?\))|([^,]+)'
-	find_function_call_regex = r'\b%s+\((.*)\)$'
+	find_function_call_regex = r'(?P<varname>.*)=*\ *%s+\((?P<params>.*)\)$'
 
 	@staticmethod
 	def extractIO(code, regex, IOClass, target_parent=None):
-		pins = []
+		pins = {}
 		lines = code.split('\n')
 		for line in lines:
-			params = re.findall(regex, line) # extract argument line (need separetion)
-
+			match = re.search(regex, line) # extract argument line and varname(need separetion)
+			if match is None: continue
+			varname = match.group('varname')
+			params = match.group('params')
 			if len(params) > 0: # at least varname and one arg
-				params = re.findall(Interpreter.extract_params_regex, params[0])
-				params = [str(eval(p[1].strip())) for p in params]
 				print(params)
-				pins += [IOClass(*params[:2], _parent=target_parent)]
+				params = re.findall(Interpreter.extract_params_regex, params)
+				params = [str(eval(p[1].strip())) for p in params]
+				pins[varname] = IOClass(*params[:2], _parent=target_parent)
 		return pins
 
 	@staticmethod
