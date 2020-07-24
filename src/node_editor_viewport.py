@@ -43,6 +43,15 @@ class QNEGraphicsView(QGraphicsView):
 		else:
 			super().mousePressEvent(event)
 
+	def keyPressEvent(self, event):
+		if GLOBALS.textIsBeingEdited: # otherwise scene 'll be scrolled alongside cursor movement
+			pass
+		super().keyPressEvent(event)
+
+	def keyReleaseEvent(self, event):
+		super().keyReleaseEvent(event)
+		
+
 	def mouseReleaseEvent(self, event):
 		if event.button() == Qt.MiddleButton:
 			self.mouseWheelReleased(event)
@@ -55,7 +64,6 @@ class QNEGraphicsView(QGraphicsView):
 
 	def mouseLeftPressed(self, event):
 		super().mousePressEvent(event)
-		print('asadsa')
 		GLOBALS.mose_pressed = True
 		for i in range(len(self.parent.scene.connections)):
 			self.parent.scene.connections[i].graphConnection.updateSelection()

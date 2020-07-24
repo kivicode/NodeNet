@@ -5,13 +5,13 @@ class IOPin:
 		self.title = _title
 		self.type = _type
 		self.dtype = _dtype
-		self.value = value
+		self.value = _value
 
-	def build(self):
+	def build(self, name):
 		is_input = self.type == 'input'
-		self.parent.addPin(self.title, is_input, self.dtype == 'layer', False)
+		self.parent.addPin(self.title, is_input, self.dtype == 'layer', False, val=self.value, dtype=self.dtype, varname=name)
 		if is_input:
-			self.parent.addPin(self.title, False, False, True, val=self.value)
+			self.parent.addPin(self.title, False, False, True, val=self.value, varname=name)
 
 	def setType(self, _type):
 		sel.dtype = _type
@@ -27,11 +27,11 @@ class IOPin:
 
 class Input(IOPin):
 
-	def __init__(self, _title, _dtype='const', value=None, _parent=None):
+	def __init__(self, _title, value, _dtype='const', _parent=None):
 		super().__init__(_parent, _title, 'input', _dtype, value)
 
 
 class Output(IOPin):
 
-	def __init__(self, _title, _dtype='const', value=None, _parent=None):
-		super().__init__(_parent, _title, 'output', _dtype, value=str)
+	def __init__(self, _title, value, _dtype='const', _parent=None):
+		super().__init__(_parent, _title, 'output', _dtype, value)

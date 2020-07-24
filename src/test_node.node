@@ -1,1 +1,3 @@
-c = input(' ', 'const', 12) # declorated as input in order to let user change the value
+c = input('value', 12, 'const') # declorated as input in order to let user change the value
+c **= 3
+output('str(i)', c)

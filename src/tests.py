@@ -9,4 +9,3 @@ c=input('title'    , kd)
 '''
 
 inputs = Interpreter.extractInputs(test_string)
-print(inputs)

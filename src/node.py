@@ -7,12 +7,17 @@ from interpreter import Interpreter
 
 class Node:
 
-	def __init__(self, scene, pos, title='Untitled node', inputs=[Input('a', 'const'), Input('b', 'const'), Input('d', 'const')], outputs=[Output('c', 'const'), Output('e', 'const')], connections=[]):
+	def __init__(self, scene, pos, title='Untitled node', inputs=[], outputs=[], connections=[]):
 		self.scene = scene
 		self.title = title
 		self.connections = []
 		self.inputs = []
+		self.input_dict = {}
 		self.outputs = []
+		self.output_dict = {}
+		self.interpreter = Interpreter(self)
+		self.base_code = ''
+		self.processed_code = ''
 
 		self.graphNode = QNEGraphicsNode(self, self.title)
 		self.setPos(pos)
@@ -63,18 +68,23 @@ class Node:
 		for item in outputs:
 			self.addPin(item.title, False, item.dtype == 'layer')
 
-	def addPin(self, title, is_input, is_layer_output=False, is_dublicate=False):
+	def addPin(self, title, is_input, is_layer_output=False, is_dublicate=False, val=0, dtype='const', varname=''):
 		pin = Pin(node=self, index=self.inputs_counter if is_input else self.outputs_counter, \
 							 title=title, \
 							 position=GLOBALS.LEFT_TOP if is_input else GLOBALS.RIGHT_TOP, \
 							 is_layer_output=is_layer_output, \
-							 is_dublicate=is_dublicate)
+							 is_dublicate=is_dublicate,
+							 value=val,
+							 dtype=dtype)
 		if is_input:
 			self.inputs_counter += 1
 			self.inputs.append(pin)
+			print('!!!', varname)
+			self.input_dict[varname] = pin
 		else:
 			self.outputs_counter += 1
 			self.outputs.append(pin)
+			self.output_dict[varname] = pin
 		for io in self.inputs + self.outputs:
 			io.graphPin.initSizes()
 		for io in self.inputs + self.outputs:
@@ -101,14 +111,40 @@ class Node:
 			code = f.read()
 			self.buildFromCode(code)
 
+	def getInputsCode(self):
+		inputs_precode = ''
+		inputs_dict,  inp_lines  = self.interpreter.extractInputs(self.base_code)
+		for i, name in enumerate(inputs_dict.keys()):
+			inputs_precode += f'{name} = {self.input_dict[name].value}\n'.lstrip()
+		return inputs_precode
+
+	def getOutputsCode(self):
+		outputs_postcode = '\n'
+		outputs_dict,  outp_lines, indentions  = self.interpreter.extractOutputs(self.base_code)
+		for i, name in enumerate(outputs_dict.keys()):
+			outputs_postcode += indentions[i] + f'self.output_dict[\'{name}\'].setValue({outputs_dict[name].value})\n'.lstrip()
+		return outputs_postcode
+
+	# def updateBodyCode(self) processed_code
+
 	def buildFromCode(self, code):
 		self.setIOPins([], []) # clear pins
-		inputs_dict  = Interpreter.extractInputs(code, target_parent=self)
-		outputs_dict = Interpreter.extractOutputs(code, target_parent=self)
-		for input_pin in inputs_dict.values():
-			input_pin.build()
+		inputs_dict,  inp_lines  = self.interpreter.extractInputs(code)
+		outputs_dict, outp_lines, _ = self.interpreter.extractOutputs(code)
+		for name, input_pin in inputs_dict.items():
+			print(name)
+			input_pin.build(name)
 
-		for output_pin in outputs_dict.values():
-			output_pin.build()
+		for name, output_pin in outputs_dict.items():
+			output_pin.build(name)
+
+		self.base_code = code
+		self.processed_code = self.interpreter.removeIOLines(code, inp_lines + outp_lines)
+		self.processed_code = self.getInputsCode() + self.processed_code + self.getOutputsCode()
+		self.eval()
+
+	def eval(self):
+		print(self.processed_code)
+		exec(self.processed_code)
 
 

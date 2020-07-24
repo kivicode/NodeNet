@@ -1,4 +1,5 @@
-from global_vars import GLOBALS
+from global_vars import GLOBALS, KEYS
+from interpreter import Interpreter
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -54,11 +55,11 @@ class QNEGraphicsPin(QGraphicsItem):
 				self.edit_item.setDefaultTextColor(pin_output_font_color)
 			self.edit_item.setZValue(-1)
 			self.edit_item.setFont(node_title_font)
-			self.edit_item.setPlainText(self._title)
+			self.edit_item.setPlainText(str(self._pin.value))
 			x = self.gNode._pin_x + self.title_x
 			width = self.gNode.width - self.gNode._pin_x - pin_editor_margin * 1.6
 			if not self.is_input:
-				x = -width - round(12)#pin_editor_margin / 1.66)
+				x = -width - round(pin_editor_margin / 1.66)
 			self.edit_item.setPos(x, node_title_hpadding - node_title_font.pointSize()*1.5)
 			self.edit_item.setTextWidth(width)
 
@@ -105,22 +106,37 @@ class QNEGraphicsPin(QGraphicsItem):
 class QEditableTextItem(QGraphicsTextItem):
 
 	def __init__(self, parent=None, *args, **argv):
+		self.graphPin = parent
 		super().__init__(parent, *args, **argv)
 
 
 	def focusInEvent(self, event):
+		GLOBALS.textIsBeingEdited = True  # oh, yeah! I love long var names
 		self.setTextInteractionFlags(Qt.TextEditable)
 
 	def boundingRect(self):
 		return QRectF(0, 0, self.textWidth(), int(node_title_font.pointSize() * 1.5 + 2))
 
 	def focusOutEvent(self, event):
+		GLOBALS.textIsBeingEdited = False
 		self.setTextInteractionFlags(Qt.NoTextInteraction)
 		_cursor = self.textCursor();
 		_cursor.clearSelection();
 		self.setTextCursor(_cursor);
 		self.update()
 		self.setTextInteractionFlags(Qt.TextEditable)
+		self.update()
+
+	def keyPressEvent(self, event):
+		if Interpreter.isNumber(event.text()):
+			super().keyPressEvent(event)
+		elif event.key() in [KEYS.ARR_LEFT, KEYS.ARR_RIGHT, KEYS.DELETE, KEYS.BACKSPACE, KEYS.SPACE]:
+			super().keyPressEvent(event)
+			if event.key() in [KEYS.ARR_LEFT, KEYS.ARR_RIGHT]:
+				_cursor = self.textCursor();
+				pos = min(len(self.toPlainText()), _cursor.position() + (1 if event.key() == KEYS.ARR_RIGHT else -1))
+				_cursor.setPosition(pos);
+				self.setTextCursor(_cursor);
 
 	def paint(self, painter, _, widget=None):
 		painter.setBrush(pin_value_background)
