@@ -1,4 +1,5 @@
 from node_connection_graph import QNEGraphicsConnection
+import inspect
 
 class Connection:
 
@@ -9,11 +10,11 @@ class Connection:
 		self.second_pin = second_pin
 
 		self.graphConnection = QNEGraphicsConnection(self)
-
-		self.scene.graphScene.addItem(self.graphConnection)
 		self.scene.addConnection(self)
 
 	def delete(self):
-		if self.first_pin is None:
+		if self.first_pin is not None:
 			self.first_pin.connection.remove(self)
 
+	def __repr__(self):
+		return f'<Connection first={self.first_pin}, second={self.second_pin}>'

@@ -78,6 +78,8 @@ class QNEGraphicsPin(QGraphicsItem):
 		painter.setBrush(pin_layer_brush if self.is_layer_output else pin_brush)
 		painter.setPen(node_default_pen)
 		painter.drawEllipse(self._getX(), -pin_radius, 2 * pin_radius, 2 * pin_radius)
+		if self.edit_item is not None:
+			self.edit_item.updateEditability()
 
 	def boundingRect(self):
 		return QRectF(
@@ -117,6 +119,16 @@ class QEditableTextItem(QGraphicsTextItem):
 	def boundingRect(self):
 		return QRectF(0, 0, self.textWidth(), int(node_title_font.pointSize() * 1.5 + 2))
 
+	def updateEditability(self):
+		return
+		isEditable = len(self.graphPin._pin.connections) > 0 or not(not self.graphPin.is_layer_output and self.graphPin.is_input)
+		if isEditable:
+			self.setTextInteractionFlags(Qt.NoTextInteraction)
+			self.setDefaultTextColor(pin_output_font_color)
+		else:
+			self.setTextInteractionFlags(Qt.TextEditable)
+			self.setDefaultTextColor(node_title_font_color)
+
 	def focusOutEvent(self, event):
 		GLOBALS.textIsBeingEdited = False
 		self.setTextInteractionFlags(Qt.NoTextInteraction)
@@ -137,6 +149,12 @@ class QEditableTextItem(QGraphicsTextItem):
 				pos = min(len(self.toPlainText()), _cursor.position() + (1 if event.key() == KEYS.ARR_RIGHT else -1))
 				_cursor.setPosition(pos);
 				self.setTextCursor(_cursor);
+
+	# def keyReleaseEvent(self, event):
+	# 	super().keyReleaseEvent(event)
+	# 	if Interpreter.isNumber(event.text()):
+	# 		self.graphPin._pin.setValue(int(self.toPlainText() + event.text()))
+	# 		self.graphPin._pin.node.eval()
 
 	def paint(self, painter, _, widget=None):
 		painter.setBrush(pin_value_background)

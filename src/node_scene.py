@@ -1,4 +1,6 @@
 from node_editor_scene import QNEGraphicsScene
+from global_vars import *
+import inspect
 
 class Scene:
 
@@ -21,8 +23,11 @@ class Scene:
 
 	def addConnection(self, edge):
 		edge.first_pin.connections.append(edge)
+		edge.first_pin.node.eval()
 		if edge.second_pin is not None:
 			edge.second_pin.connections.append(edge)
+			edge.second_pin.setValue(edge.first_pin.value)
+			edge.second_pin.node.eval()
 		self.connections.append(edge)
 		self.graphScene.addItem(edge.graphConnection)
 
@@ -33,8 +38,12 @@ class Scene:
 		self.nodes.remove(node)
 
 	def removeConnection(self, edge):
+		edge.first_pin.connections.remove(edge)
+		if edge.second_pin is not None:
+			edge.second_pin.connections.remove(edge)
 		self.connections.remove(edge)
 		self.graphScene.removeItem(edge.graphConnection)
 
 	def removePin(self, pin):
 		self.pins.remove(pin)
+		self.graphScene.removeItem(pin.graphPin)

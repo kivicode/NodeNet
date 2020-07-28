@@ -3,6 +3,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from settings import *
 from math import floor, ceil
+import inspect
+from node_connection_graph import QNEGraphicsConnection
 
 class QNEGraphicsScene(QGraphicsScene):
 
@@ -20,6 +22,7 @@ class QNEGraphicsScene(QGraphicsScene):
 		self.width, self.height = 128000, 64000
 
 		self.setBackgroundBrush(self._background_color)
+
 
 	def setGraphScene(self, width, height):
 		self.setSceneRect(-width // 2, -height // 2, width, height)	

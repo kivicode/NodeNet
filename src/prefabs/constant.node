@@ -1,1 +1,2 @@
-# input() # to allow user to
+setTitle('Constant')
+input('value', 0, 'const') # to allow user to edit it

@@ -52,7 +52,7 @@ connection_layer_pen.setWidth(4)
 connection_selected_pen = QPen(QColor(255, 255, 163))
 connection_selected_pen.setWidth(4)
 connection_shift_ratio = 6
-connection_shift = 10
+connection_shift = 30
 
 wire_skip_size = 15
 draw_skips = False

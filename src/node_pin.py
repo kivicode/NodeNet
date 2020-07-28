@@ -32,5 +32,10 @@ class Pin():
 		self.graphPin.setPos(*newPos)
 
 	def setValue(self, val):
+		print('upd val')
 		self.value = val
 		self.graphPin.edit_item.setPlainText(str(val))
+		self.graphPin.edit_item.update()
+
+	def __repr__(self):
+		return '<Pin title={}, value={}>'.format(self.title, self.value)

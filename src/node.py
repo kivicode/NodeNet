@@ -4,6 +4,7 @@ from node_pin import *
 from settings import *
 from io_pins import *
 from interpreter import Interpreter
+import re
 
 class Node:
 
@@ -52,10 +53,26 @@ class Node:
 
 	def setIOPins(self, inputs, outputs):
 		for pin in self.inputs + self.outputs:
-			self.scene.graphScene.removeItem(pin.graphPin)
+			self.scene.removePin(pin)
+			del pin.graphPin
+			del pin
+
+		for pin in self.input_dict.values():
+			try:
+				self.scene.removePin(pin)
+			except ValueError:
+				pass
+
+		for pin in self.output_dict.values():
+			try:
+				self.scene.removePin(pin)
+			except ValueError:
+				pass
 
 		self.inputs = []
 		self.outputs = []
+		self.input_dict = {}
+		self.output_dict = {}
 		# self.count = max(len(inputs), len(inputs))
 		self.inputs_counter = 0
 		self.outputs_counter = 0
@@ -79,7 +96,6 @@ class Node:
 		if is_input:
 			self.inputs_counter += 1
 			self.inputs.append(pin)
-			print('!!!', varname)
 			self.input_dict[varname] = pin
 		else:
 			self.outputs_counter += 1
@@ -89,6 +105,12 @@ class Node:
 			io.graphPin.initSizes()
 		for io in self.inputs + self.outputs:
 			io.graphPin.initTitle()
+
+
+	def setTitle(self, title):
+		self.title = title
+		self.graphNode.setTitle(title)
+
 	# def removeInput(self, idx):
 	# 	_input = self.inputs[idx]
 	# 	dublicate_output = self.outputs[idx]
@@ -132,19 +154,28 @@ class Node:
 		inputs_dict,  inp_lines  = self.interpreter.extractInputs(code)
 		outputs_dict, outp_lines, _ = self.interpreter.extractOutputs(code)
 		for name, input_pin in inputs_dict.items():
-			print(name)
 			input_pin.build(name)
 
 		for name, output_pin in outputs_dict.items():
 			output_pin.build(name)
-
+		print(self.outputs)
 		self.base_code = code
-		self.processed_code = self.interpreter.removeIOLines(code, inp_lines + outp_lines)
-		self.processed_code = self.getInputsCode() + self.processed_code + self.getOutputsCode()
 		self.eval()
 
 	def eval(self):
+		inputs_dict,  inp_lines  = self.interpreter.extractInputs(self.base_code)
+		outputs_dict, outp_lines, _ = self.interpreter.extractOutputs(self.base_code)
+
+		self.processed_code = self.interpreter.removeIOLines(self.base_code, inp_lines + outp_lines)
+		self.processed_code = self.getInputsCode() + self.processed_code + self.getOutputsCode()
+		self.processed_code = re.sub(r'\n?setTitle\(', '\nself.setTitle(', self.processed_code)
+
+		print('-'*10, 'PROCESSED', '-'*10)
 		print(self.processed_code)
+		print('-'*10)
+		# print('\n'+'-'*10, 'BASE','-'*10)
+		# print(self.base_code)
+		# print('-'*10)
 		exec(self.processed_code)
 
 

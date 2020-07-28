@@ -70,8 +70,7 @@ class QNEGraphicsNode(QGraphicsItem):
 	@property
 	def title(self): return self._title
 
-	@title.setter
-	def title(self, val): 
+	def setTitle(self, val): 
 		self._title = val
 		self.title_item.setPlainText(self._title)
 

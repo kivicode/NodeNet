@@ -1,3 +1,4 @@
-c = input('value', 12, 'const') # declorated as input in order to let user change the value
-c **= 3
-output('str(i)', c)
+setTitle('Square')
+c = input('value', 12, 'const')
+c **= 2
+output('output', c)

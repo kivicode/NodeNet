@@ -8,6 +8,7 @@ from node_editor_scene import QNEGraphicsScene
 from node_editor_viewport import QNEGraphicsView
 from settings import *
 from global_vars import *
+from prefab_nodes import *
 
 class NodeEditorWindow(QWidget):
 
@@ -40,18 +41,19 @@ class NodeEditorWindow(QWidget):
 
 		self.show()
 
-	def spawnNode(self, *args, **argv):
-		Node(self.scene, *args, **argv)
+	def spawnNode(self, NodeClass, *args, **argv):
+		NodeClass(self.scene, *args, **argv).buildFromFile('test_node.node')
 
 	def spawnConnection(self, first, second, *args, **argv):
 		Connection(self.scene, first, second)
 
 
 	def addDebugContent(self):
-		self.spawnNode(QPoint(0, 0), title='Batch Norm')
+		self.spawnNode(Node, QPoint(-300, 0), title='Batch Norm')
+		self.spawnNode(Node, QPoint(200, 0), title='Batch Norm')
 		# self.spawnNode(QPoint(-200, -200), title='Batch Norm')
 		# self.spawnNode(QPoint(200, 10), title='Batch Norm')
-		self.scene.nodes[0].buildFromFile('test_node.node')
+		# self.scene.nodes[0].buildFromFile('test_node.node')
 		# self.spawnConnection()
 
 	def contextMenuEvent(self, event):
