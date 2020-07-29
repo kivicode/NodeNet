@@ -81,4 +81,4 @@ add_executable(NodeNet
         imgui.ini
         imnodes.cpp
         imnodes.h
-        Makefile src/data_storages.h src/node_generator.h src/interpriter.cpp src/settings.h src/utils.h src/executor.h)
+        Makefile src/data_storages.h src/node_generator.h src/interpriter.cpp src/settings.h src/utils.h src/executor.h src/templates.h)

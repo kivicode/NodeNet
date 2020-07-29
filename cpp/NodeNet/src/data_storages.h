@@ -11,11 +11,16 @@
 #define NODENET_DTYPES_H
 
 #include "utils.h"
+#include "executor.h"
+#include <array>
+#include <sstream>
+#include <regex>
 
 enum SliderDataType : int {
     INTEGER,
     FLOAT,
-    STRING
+    STRING,
+    CODE
 };
 
 enum PrivatePinType {
@@ -121,27 +126,42 @@ public:
         this->processedCode = this->baseCode;
     }
 
+    void setProcessedCode(std::string code) {
+        this->processedCode = std::move(code);
+    }
+
     void setConfig(NodeConfig newConfig) {
         this->setBaseCode(newConfig.baseCode);
         this->config = std::move(newConfig);
     }
 
-    void replaceInputsWithValues(const std::vector<std::pair<bool, std::pair<int, int>>>& ioCodePositions) {
-        for (std::pair<bool, std::pair<int, int>> io : ioCodePositions) {
+    void replaceInputsWithValues(std::vector<std::pair<bool, std::array<int, 3>>>& ioCodePositions) {
+        this->processedCode = "";
+        for (std::pair<bool, std::array<int, 3>> io : ioCodePositions) {
             bool isInput = io.first;
-            int start = io.second.first;
-            int length = io.second.second;
 
+            int lineNo = io.second[0];
+            int start  = io.second[1];
+            int length = io.second[2];
 
+            std::stringstream ss(this->baseCode);
+            std::string line;
+            int linesNumber = 0;
 
-            if (isInput) {
-                int funcNameSize = std::string("input(").length();
-                std::cout << start << "\n";
-                std::cout << start << "\n";
-                this->processedCode.replace(start - funcNameSize, length + funcNameSize + 1, "1");
+            while (std::getline(ss, line, '\n')) { // iterate over lines
+                if (linesNumber == lineNo and isInput) {
+                    int funcNameSize = std::string("input(").length();
+                    line.replace(start - funcNameSize, length + funcNameSize + 1, "1");
+                }
+                this->processedCode += line + "\n";
+                linesNumber++;
             }
-            std::cout << "New code: \n" << this->processedCode;
         }
+    }
+
+    void generateProcessedCode() {
+        auto ioCodePositions = Executor::getIOCodePositionsAndLengths(this->baseCode);
+        this->replaceInputsWithValues(ioCodePositions);
     }
 
 };
@@ -228,6 +248,26 @@ class Editor {
             Node placeholderNode = Node(-1, -1);
             return {placeholderNode, false};
         }
+
+    std::pair<PinLocation, bool> getNextPinLocation(Node& node, int localPinId) { // returns: {{parent node id, local pin id}, was found?}
+
+        auto linkData = this->getLinkToPin(node, localPinId);
+        std::cout << linkData.first.start_attr << " " << linkData.second << "\n";
+
+        if (linkData.second) { // link was found
+            std::cout << 1 << "\n";
+            int newPinId = linkData.first.start_attr;
+            auto searchResult = this->getNodeThatHasPinById(newPinId);
+            if (searchResult.second) { // it's not an edge node (has incoming links)
+                auto newPinSearchResult = searchResult.first.globalPinIdToLocal(newPinId);
+                if (newPinSearchResult.second) { // target pin exists
+                    return {{searchResult.first.id, newPinSearchResult.first}, true};
+                }
+            }
+        }
+        std::cout << "Link not found for: " << node.config.title << "\n";
+        return {{-1,-1}, false};
+    }
 };
 
 #endif

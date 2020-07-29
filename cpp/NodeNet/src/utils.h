@@ -7,6 +7,8 @@
 #define NODENET_UTILS_H
 
 #include "settings.h"
+#include <iostream>
+#include <fstream>
 
 #define VECTOR_CONTAINS(vector, value) std::find(vector.begin(), vector.end(), value) != vector.end()
 #define MAP_HAS_KEY(map, key) map.find(key) != map.end()
@@ -35,6 +37,18 @@ std::pair<bool, int > findInVector(const std::vector<T>  & vecOfElements, const 
 std::string printPinLocation(PinLocation pinLocation) {
     std::cout << "{ node=" << pinLocation.first << "\tpin=" << pinLocation.second << "}";
     return "";
+}
+
+std::string readFile(const std::string& path) {
+    std::string output, line;
+    std::ifstream file(path);
+
+    while (getline(file, line)) {
+        output += line + "\n";
+    }
+
+    file.close();
+    return output;
 }
 
 #endif //NODENET_UTILS_H

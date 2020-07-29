@@ -42,19 +42,21 @@ namespace graphics {
     }
 
     void drawNode(Node &node) {
-        switch (node._type) {
-            case PrivatePinType::CUSTOM :
-                NodeGenerator::generateTestNode(editor, node);
-                break;
-
-            case PrivatePinType::START :
-                NodeGenerator::generateStartNode(editor, node);
-                break;
-
-            case PrivatePinType::FINISH :
-                NodeGenerator::generateFinishNode(editor, node);
-                break;
-        }
+//        std::cout << node.config.title << "\n";
+        NodeGenerator::generateFromConfig(editor, node, node.config);
+//        switch (node._type) {
+//            case PrivatePinType::CUSTOM :
+//                NodeGenerator::generateTestNode(editor, node, "");
+//                break;
+//
+//            case PrivatePinType::START :
+//                NodeGenerator::generateStartNode(editor, node);
+//                break;
+//
+//            case PrivatePinType::FINISH :
+//                NodeGenerator::generateFinishNode(editor, node);
+//                break;
+//        }
     }
 
     void updateLinks() {
@@ -69,7 +71,9 @@ namespace graphics {
             if (imnodes::IsLinkCreated(&link.start_attr, &link.end_attr)) {
                 link.id = ++editor.current_id;
                 link.sort(editor.nodes);
+#ifdef DEBUG
                 std::cout << "Create link: " << link.start_attr << "  " << link.end_attr << "\n";
+#endif
                 editor.links.push_back(link);
             }
         }
@@ -98,14 +102,14 @@ namespace graphics {
         }
 
         if (ImGui::BeginPopup("Spawn node")) {
-            if (ImGui::MenuItem("Input node")) {
+            if      (ImGui::MenuItem("Input node")) {
 
                 const int node_id = ++editor.current_id;
                 imnodes::SetNodeScreenSpacePos(node_id, ImGui::GetMousePos());
                 Node node = Node(node_id, 0.f);
-                node._type = PrivatePinType::START;
                 editor.nodes.push_back(node);
                 editor.inputNodeIds.push_back(node.id);
+                NodeGenerator::buildStartNode(editor.nodes[editor.nodes.size()-1], "");
 #ifdef DEBUG
                 std::cout << "Create node: " << node_id << "\n";
 #endif
@@ -115,8 +119,9 @@ namespace graphics {
                 const int node_id = ++editor.current_id;
                 imnodes::SetNodeScreenSpacePos(node_id, ImGui::GetMousePos());
                 Node node = Node(node_id, 0.f);
-                node._type = PrivatePinType::CUSTOM;
                 editor.nodes.push_back(node);
+                NodeGenerator::buildTestNode(editor.nodes[editor.nodes.size()-1], "");
+
 #ifdef DEBUG
                 std::cout << "Create node: " << node_id << "\n";
 #endif
@@ -126,9 +131,8 @@ namespace graphics {
                 const int node_id = ++editor.current_id;
                 imnodes::SetNodeScreenSpacePos(node_id, ImGui::GetMousePos());
                 Node node = Node(node_id, 0.f);
-                node._type = PrivatePinType::FINISH;
                 editor.nodes.push_back(node);
-                editor.finishNodeIds.push_back(node.id);
+                NodeGenerator::buildFinishNode(editor.nodes[editor.nodes.size()-1], "");
 #ifdef DEBUG
                 std::cout << "Create node: " << node_id << "\n";
 #endif
@@ -140,9 +144,12 @@ namespace graphics {
     void debug() {
         if (ImGui::IsKeyReleased(SDL_SCANCODE_K)) {
             std::cout << "\n\n";
-            editor.nodes[0].setBaseCode("a = input(\"abc\")\nb = input(\"lol\")\nj = output(\"qwqw\")\n");
+            std::string fileContent = readFile("/Users/kivicode/Documents/GitHub/NodeNet/cpp/NodeNet/templates/test.node");
+            std::cout << fileContent << "\n";
+            editor.nodes[0].setBaseCode(fileContent);
             auto res = Executor::getIOCodePositionsAndLengths(editor.nodes[0].baseCode);
             editor.nodes[0].replaceInputsWithValues(res);
+            std::cout << "New code: \n" <<  editor.nodes[0].processedCode;
 //            for (auto io : res) {
 //                std::cout << (io.first ? "Input" : "Output") << ": pos=" << io.second.first << " len=" << io.second.second << "\n";
 //            }

@@ -5,6 +5,7 @@
 #ifndef NODENET_SETTINGS_H
 #define NODENET_SETTINGS_H
 
+
 #define MAX_PINS 100
 
 #define DEBUG

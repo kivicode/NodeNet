@@ -8,6 +8,7 @@
 
 #include "data_storages.h"
 #include "settings.h"
+#include "templates.h"
 
 #include "utils.h"
 
@@ -47,7 +48,7 @@ namespace NodeGenerator {
 
                 if (config.inputs[i].isEditable && !editor.pinHasLink(pinId)) { // Draw slider if has no links
                     ImGui::SameLine();
-                    int nodeWidth = config.inputs[i].dataType == SliderDataType::STRING ? 170 : 100;
+                    float nodeWidth = config.inputs[i].dataType == SliderDataType::STRING ? 170 : 100;
                     ImGui::PushItemWidth(nodeWidth - label_width);
 
                     switch(config.inputs[i].dataType) {
@@ -69,6 +70,9 @@ namespace NodeGenerator {
                             if(node._type != PrivatePinType::CUSTOM) {
                                 ImGui::InputText("##hidelabel", reinterpret_cast<char *>(node.modelName), 1024);
                             }
+                            break;
+
+                        default:
                             break;
                     }
                     ImGui::PopItemWidth();
@@ -108,31 +112,22 @@ namespace NodeGenerator {
         imnodes::EndNode();
     }
 
-    void generateTestNode(Editor& editor, Node& node) {
-        std::vector<NodeIOPin> inputs =  {NodeIOPin("input", true, SliderDataType::FLOAT, 0, 1, 0.01f),
-                                          NodeIOPin("Layers", true, SliderDataType::INTEGER, 0, 1000, 1)};
-        std::vector<NodeIOPin> outputs = {NodeIOPin("output", false), NodeIOPin("output 2", false)};
-
-        NodeConfig test_config = NodeConfig("abc", inputs, outputs);
+    void buildTestNode(Node& node, const std::string& path) {
+        node._type = PrivatePinType::CUSTOM;
+        test_config.baseCode = readFile(path);
         node.setConfig(test_config);
-        NodeGenerator::generateFromConfig(editor, node, test_config);
     }
 
-    void generateFinishNode(Editor& editor, Node& node) {
-        std::vector<NodeIOPin> inputs =  {NodeIOPin("Code", false), NodeIOPin("Model name", true, SliderDataType::STRING)};
-
+    void buildFinishNode(Node& node, const std::string& path) {
         node._type = PrivatePinType::FINISH;
-        NodeConfig test_config = NodeConfig("Finish", inputs, std::vector<NodeIOPin>{});
-        NodeGenerator::generateFromConfig(editor, node, test_config);
+        finish_config.baseCode = readFile(path);
+        node.setConfig(finish_config);
     }
 
-    void generateStartNode(Editor& editor, Node& node) {
-        std::vector<NodeIOPin> inputs =  {NodeIOPin("Input name", true, SliderDataType::STRING)};
-        std::vector<NodeIOPin> outputs = {NodeIOPin("", false)};
-
+    void buildStartNode(Node& node, const std::string& path) {
         node._type = PrivatePinType::START;
-        NodeConfig test_config = NodeConfig("Input", inputs, outputs);
-        NodeGenerator::generateFromConfig(editor, node, test_config);
+        start_config.baseCode = readFile(path);
+        node.setConfig(start_config);
     }
 
 }
