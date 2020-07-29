@@ -13,6 +13,7 @@
 
 #define GET_INPUT_ID(node, internalId) node.id + (MAX_PINS * (internalId + 1))
 #define GET_OUTPUT_ID(node, internalId) GET_INPUT_ID(node, node.inputs.size() + internalId)
+#define PinLocation std::pair<int, int> // {parent node id, local pin id}
 
 #define GLOBAL_PIN_ID_TO_LOCAL(node, internalId) GET_INPUT_ID(node, node.inputs.size() + internalId)
 
@@ -29,6 +30,11 @@ std::pair<bool, int > findInVector(const std::vector<T>  & vecOfElements, const 
         result.second = -1;
     }
     return result;
+}
+
+std::string printPinLocation(PinLocation pinLocation) {
+    std::cout << "{ node=" << pinLocation.first << "\tpin=" << pinLocation.second << "}";
+    return "";
 }
 
 #endif //NODENET_UTILS_H

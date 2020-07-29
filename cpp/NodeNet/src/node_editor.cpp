@@ -139,9 +139,21 @@ namespace graphics {
 
     void debug() {
         if (ImGui::IsKeyReleased(SDL_SCANCODE_K)) {
-            editor.nodes[0].inputs[editor.nodes[0].inputIds[0]] = 1;
-            Node& node = editor.nodes[editor.nodes.size()-1];
-            std::cout << "Value: " << Executor::getLinkedValue(editor, node, 1) << "\n";
+            std::cout << "\n\n";
+            editor.nodes[0].setBaseCode("a = input(\"abc\")\nb = input(\"lol\")\nj = output(\"qwqw\")\n");
+            auto res = Executor::getIOCodePositionsAndLengths(editor.nodes[0].baseCode);
+            editor.nodes[0].replaceInputsWithValues(res);
+//            for (auto io : res) {
+//                std::cout << (io.first ? "Input" : "Output") << ": pos=" << io.second.first << " len=" << io.second.second << "\n";
+//            }
+//            for (int finishNodeId : editor.finishNodeIds) {
+//                auto sequence = Executor::getSequenceOfPinsForInputValue(editor, PinLocation(finishNodeId, 0)); // First pin of a finish node is always a code pin
+//                int i = 0;
+//                for (PinLocation pinLocation : sequence) {
+//                    std::cout << "[" << i << "]  " << printPinLocation(pinLocation) << "\n";
+//                    i++;
+//                }
+//            }
         }
     }
 

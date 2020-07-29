@@ -110,10 +110,11 @@ namespace NodeGenerator {
 
     void generateTestNode(Editor& editor, Node& node) {
         std::vector<NodeIOPin> inputs =  {NodeIOPin("input", true, SliderDataType::FLOAT, 0, 1, 0.01f),
-                                          NodeIOPin("Layers", false, SliderDataType::INTEGER, 0, 1000, 1)};
+                                          NodeIOPin("Layers", true, SliderDataType::INTEGER, 0, 1000, 1)};
         std::vector<NodeIOPin> outputs = {NodeIOPin("output", false), NodeIOPin("output 2", false)};
 
         NodeConfig test_config = NodeConfig("abc", inputs, outputs);
+        node.setConfig(test_config);
         NodeGenerator::generateFromConfig(editor, node, test_config);
     }
 

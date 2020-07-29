@@ -71,12 +71,18 @@ public:
     std::vector<NodeIOPin> inputs = {};
     std::vector<NodeIOPin> outputs = {};
 
+    std::string baseCode = "";
+
     NodeConfig() = default;
 
     NodeConfig(std::string title, std::vector<NodeIOPin> inputs, std::vector<NodeIOPin> outputs) {
-        this->title =  title;
-        this->inputs = inputs;
+        this->title =  std::move(title);
+        this->inputs = std::move(inputs);
         this->outputs = outputs;
+    }
+
+    void setCode(std::string newCode) {
+        this->baseCode = std::move(newCode);
     }
 };
 
@@ -86,6 +92,9 @@ public:
     int id;
     float value;
     char* modelName[1024] = {0};
+
+    std::string baseCode = "";
+    std::string processedCode = "";
 
     NodeConfig config = NodeConfig();
 
@@ -99,13 +108,42 @@ public:
 
     Node(const int i, const float v) : id(i), value(v) {}
 
-    std::pair<int, bool> globalPinIdToLocal(int globalId) {
+    std::pair<int, bool> globalPinIdToLocal(int globalId) const {
         auto searchOverInputs  = findInVector<int>(this->inputIds,  globalId);
         auto searchOverOutputs = findInVector<int>(this->outputIds, globalId);
         if (searchOverInputs.second) return  searchOverInputs;
         if (searchOverOutputs.second) return searchOverOutputs;
         return {-1, false};
     }
+
+    void setBaseCode(std::string code) {
+        this->baseCode = std::move(code);
+        this->processedCode = this->baseCode;
+    }
+
+    void setConfig(NodeConfig newConfig) {
+        this->setBaseCode(newConfig.baseCode);
+        this->config = std::move(newConfig);
+    }
+
+    void replaceInputsWithValues(const std::vector<std::pair<bool, std::pair<int, int>>>& ioCodePositions) {
+        for (std::pair<bool, std::pair<int, int>> io : ioCodePositions) {
+            bool isInput = io.first;
+            int start = io.second.first;
+            int length = io.second.second;
+
+
+
+            if (isInput) {
+                int funcNameSize = std::string("input(").length();
+                std::cout << start << "\n";
+                std::cout << start << "\n";
+                this->processedCode.replace(start - funcNameSize, length + funcNameSize + 1, "1");
+            }
+            std::cout << "New code: \n" << this->processedCode;
+        }
+    }
+
 };
 
 class Link {
@@ -160,6 +198,7 @@ class Editor {
 
         std::pair<Link, bool> getLinkToPin(Node& node, int localPinId) {
             int globalPinId = node.inputIds[localPinId];
+            std::cout << "Global pin id: " << globalPinId << "\n";
             std::vector<Link> possibleLinks = this->getLinksOfNode(node);
 
             bool targetLinkFound = false;
