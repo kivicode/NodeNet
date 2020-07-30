@@ -1,5 +1,5 @@
-#include "node_editor.h"
-#include "node_generator.h"
+#include "editor.h"
+#include "generator.cpp"
 #include "executor.h"
 
 #include <imnodes.h>

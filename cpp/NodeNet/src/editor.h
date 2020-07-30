@@ -1,7 +1,6 @@
 #pragma once
 
-namespace graphics
-{
+namespace graphics {
 void NodeEditorInitialize();
 void NodeEditorShow();
 void NodeEditorShutdown();

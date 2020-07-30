@@ -4,13 +4,12 @@
 
 #include "imnodes.h"
 #include "imgui.h"
-#include "graph.h"
 
-#include "data_storages.h"
+#include "data_types.h"
 #include "settings.h"
 #include "templates.h"
 
-#include "utils.h"
+#include "utils.cpp"
 
 namespace NodeGenerator {
 

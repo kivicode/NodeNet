@@ -1,14 +1,11 @@
 //
-// Created by  KiviCode on 27/07/2020.
+// Created by  KiviCode on 30/07/2020.
 //
-
 
 #ifndef NODENET_UTILS_H
 #define NODENET_UTILS_H
 
-#include "settings.h"
 #include <iostream>
-#include <fstream>
 
 #define VECTOR_CONTAINS(vector, value) std::find(vector.begin(), vector.end(), value) != vector.end()
 #define MAP_HAS_KEY(map, key) map.find(key) != map.end()
@@ -20,35 +17,11 @@
 #define GLOBAL_PIN_ID_TO_LOCAL(node, internalId) GET_INPUT_ID(node, node.inputs.size() + internalId)
 
 template < typename T>
-std::pair<bool, int > findInVector(const std::vector<T>  & vecOfElements, const T  & element) {
-    std::pair<bool, int > result;
-    // Find given element in vector
-    auto it = std::find(vecOfElements.begin(), vecOfElements.end(), element);
-    if (it != vecOfElements.end()) {
-        result.second = distance(vecOfElements.begin(), it);
-        result.first = true;
-    } else {
-        result.first = false;
-        result.second = -1;
-    }
-    return result;
-}
+std::pair<bool, int > findInVector(const std::vector<T>& vecOfElements, const T  & element);
 
-std::string printPinLocation(PinLocation pinLocation) {
-    std::cout << "{ node=" << pinLocation.first << "\tpin=" << pinLocation.second << "}";
-    return "";
-}
+std::string printPinLocation(PinLocation pinLocation);
 
-std::string readFile(const std::string& path) {
-    std::string output, line;
-    std::ifstream file(path);
+std::string readFile(const std::string& path);
 
-    while (getline(file, line)) {
-        output += line + "\n";
-    }
-
-    file.close();
-    return output;
-}
 
 #endif //NODENET_UTILS_H

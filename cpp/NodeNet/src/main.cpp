@@ -1,12 +1,11 @@
-#include "node_editor.h"
+#include "editor.h"
 #include <imgui.h>
 #include <imgui_impl_sdl.h>
 #include <imgui_impl_opengl3.h>
 #include <imnodes.h>
-#include <stdio.h>
-#include <SDL.h>
+#include <cstdio>
+#include <SDL2/SDL.h>
 #include <GL/gl3w.h>
-#include <iostream>
 
 
 int main(int, char**)

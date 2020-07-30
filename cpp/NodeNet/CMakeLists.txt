@@ -74,11 +74,10 @@ add_executable(NodeNet
         lib/Debug/libgl3w.a
         lib/Debug/libimgui.a
         lib/Debug/libimnodes.a
-        src/graph.h
         src/main.cpp
-        src/node_editor.cpp
-        src/node_editor.h
+        src/editor.cpp
+        src/editor.h
         imgui.ini
         imnodes.cpp
         imnodes.h
-        Makefile src/data_storages.h src/node_generator.h src/interpriter.cpp src/settings.h src/utils.h src/executor.h src/templates.h)
+        Makefile src/data_types.cpp src/generator.cpp src/settings.h src/utils.cpp src/executor.h src/templates.h src/generator.h src/utils.h src/data_types.h)

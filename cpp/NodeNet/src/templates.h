@@ -5,7 +5,7 @@
 #ifndef NODENET_TEMPLATES_H
 #define NODENET_TEMPLATES_H
 
-#include "data_storages.h"
+#include "data_types.cpp"
 
 std::vector<NodeIOPin> testInputs =  {NodeIOPin("input", true, SliderDataType::CODE, 0, 1, 0.01f),
                                       NodeIOPin("Layers", true, SliderDataType::INTEGER, 0, 1000, 1)};
