@@ -6,6 +6,8 @@
 #ifndef NODENET_UTILS_CPP
 #define NODENET_UTILS_CPP
 
+#include "utils.h"
+
 #include "settings.h"
 #include <iostream>
 #include <fstream>
@@ -48,6 +50,7 @@ std::string readFile(const std::string& path) {
     }
 
     file.close();
+    std::cout << "Read: " << output << "\n";
     return output;
 }
 

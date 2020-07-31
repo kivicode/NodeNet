@@ -7,15 +7,14 @@
 
 #include "data_types.cpp"
 
-std::vector<NodeIOPin> testInputs =  {NodeIOPin("input", true, SliderDataType::CODE, 0, 1, 0.01f),
-                                      NodeIOPin("Layers", true, SliderDataType::INTEGER, 0, 1000, 1)};
-std::vector<NodeIOPin> testOutputs = {NodeIOPin("output", false), NodeIOPin("output 2", false)};
+std::vector<NodeIOPin> testInputs =  {NodeIOPin("Units", true, SliderDataType::INTEGER, 0, 1000, 1)};
+std::vector<NodeIOPin> testOutputs = {NodeIOPin("output", false)};
 NodeConfig test_config = NodeConfig("abc", testInputs, testOutputs);
 
 std::vector<NodeIOPin> finish_inputs =  {NodeIOPin("Code", false), NodeIOPin("Model name", true, SliderDataType::STRING)};
 NodeConfig finish_config = NodeConfig("Finish", finish_inputs, std::vector<NodeIOPin>{});
 
-std::vector<NodeIOPin> start_inputs =  {NodeIOPin("Input name", true, SliderDataType::STRING)};
+std::vector<NodeIOPin> start_inputs =  {};
 std::vector<NodeIOPin> start_outputs = {NodeIOPin("", false)};
 NodeConfig start_config = NodeConfig("Input", start_inputs, start_outputs);
 

@@ -75,9 +75,8 @@ add_executable(NodeNet
         lib/Debug/libimgui.a
         lib/Debug/libimnodes.a
         src/main.cpp
-        src/editor.cpp
         src/editor.h
         imgui.ini
         imnodes.cpp
         imnodes.h
-        Makefile src/data_types.cpp src/generator.cpp src/settings.h src/utils.cpp src/executor.h src/templates.h src/generator.h src/utils.h src/data_types.h)
+        Makefile src/data_types.cpp src/generator.cpp src/settings.h src/utils.cpp src/executor.h src/templates.h src/generator.h src/utils.h src/data_types.h src/executor.cpp)

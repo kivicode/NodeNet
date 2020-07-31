@@ -7,7 +7,7 @@
 
 #include "imnodes.h"
 #include "imgui.h"
-#include "data_types.cpp"
+#include "data_types.h"
 
 namespace NodeGenerator {
 

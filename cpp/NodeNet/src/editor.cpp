@@ -120,7 +120,7 @@ namespace graphics {
                 imnodes::SetNodeScreenSpacePos(node_id, ImGui::GetMousePos());
                 Node node = Node(node_id, 0.f);
                 editor.nodes.push_back(node);
-                NodeGenerator::buildTestNode(editor.nodes[editor.nodes.size()-1], "");
+                NodeGenerator::buildTestNode(editor.nodes[editor.nodes.size()-1], "/Users/kivicode/Documents/GitHub/NodeNet/cpp/NodeNet/templates/test.node");
 
 #ifdef DEBUG
                 std::cout << "Create node: " << node_id << "\n";
@@ -144,23 +144,7 @@ namespace graphics {
     void debug() {
         if (ImGui::IsKeyReleased(SDL_SCANCODE_K)) {
             std::cout << "\n\n";
-            std::string fileContent = readFile("/Users/kivicode/Documents/GitHub/NodeNet/cpp/NodeNet/templates/test.node");
-            std::cout << fileContent << "\n";
-            editor.nodes[0].setBaseCode(fileContent);
-            auto res = Executor::getIOCodePositionsAndLengths(editor.nodes[0].baseCode);
-            editor.nodes[0].replaceInputsWithValues(res);
-            std::cout << "New code: \n" <<  editor.nodes[0].processedCode;
-//            for (auto io : res) {
-//                std::cout << (io.first ? "Input" : "Output") << ": pos=" << io.second.first << " len=" << io.second.second << "\n";
-//            }
-//            for (int finishNodeId : editor.finishNodeIds) {
-//                auto sequence = Executor::getSequenceOfPinsForInputValue(editor, PinLocation(finishNodeId, 0)); // First pin of a finish node is always a code pin
-//                int i = 0;
-//                for (PinLocation pinLocation : sequence) {
-//                    std::cout << "[" << i << "]  " << printPinLocation(pinLocation) << "\n";
-//                    i++;
-//                }
-//            }
+            editor.nodes[0].generateProcessedCode(editor.getLinksOfNode(editor.nodes[0]));
         }
     }
 

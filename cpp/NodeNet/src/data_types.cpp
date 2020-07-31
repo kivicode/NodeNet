@@ -10,53 +10,33 @@
 #include <utility>
 #include <vector>
 #include <string>
-#include <map>
 
 #include "utils.cpp"
 #include "executor.h"
 #include <array>
-#include <sstream>
-#include <regex>
 
 
-NodeIOPin::NodeIOPin(std::string name, bool isEditable) {
-    this->name = std::move(name);
-    this->isEditable = isEditable;
-}
-
-NodeIOPin::NodeIOPin(std::string name, bool isEditable, SliderDataType dataType) {
-    this->name = std::move(name);
-    this->isEditable = isEditable;
-    this->dataType = dataType;
-}
-
-NodeIOPin::NodeIOPin(std::string name, bool isEditable, float minSliderVal, float maxSliderVal, float sliderSpeed) {
-    this->name = name;
-    this->isEditable = isEditable;
-    this->minSliderVal = minSliderVal;
-    this->maxSliderVal = maxSliderVal;
-    this->sliderSpeed = sliderSpeed;
-}
-
-NodeIOPin::NodeIOPin(std::string name, bool isEditable, SliderDataType dataType, float minSliderVal, float maxSliderVal, float sliderSpeed) {
-    this->name = name;
-    this->isEditable = isEditable;
-    this->minSliderVal = minSliderVal;
-    this->maxSliderVal = maxSliderVal;
-    this->sliderSpeed = sliderSpeed;
-    this->dataType = dataType;
-}
+/* ========== NODE IO PIN ========== */
+NodeIOPin::NodeIOPin(std::string name, bool isEditable)                                                                                     : name(std::move(name)), isEditable(isEditable) {}
+NodeIOPin::NodeIOPin(std::string name, bool isEditable, SliderDataType dataType)                                                            : name(std::move(name)), isEditable(isEditable), dataType(dataType) {}
+NodeIOPin::NodeIOPin(std::string name, bool isEditable, SliderDataType dataType, float minSliderVal, float maxSliderVal, float sliderSpeed) : name(std::move(name)), isEditable(isEditable), dataType(dataType), minSliderVal(minSliderVal), maxSliderVal(maxSliderVal), sliderSpeed(sliderSpeed) {}
+NodeIOPin::NodeIOPin(std::string name, bool isEditable, float minSliderVal, float maxSliderVal, float sliderSpeed)                          : name(std::move(name)), isEditable(isEditable), minSliderVal(minSliderVal), maxSliderVal(maxSliderVal), sliderSpeed(sliderSpeed) {}
 
 
-NodeConfig::NodeConfig(std::string title, std::vector<NodeIOPin> inputs, std::vector<NodeIOPin> outputs) {
-    this->title =  std::move(title);
-    this->inputs = std::move(inputs);
-    this->outputs = outputs;
-}
+
+
+/* ========== NODE CONFIG ========== */
+
+NodeConfig::NodeConfig(std::string title, std::vector<NodeIOPin> inputs, std::vector<NodeIOPin> outputs) : title(std::move(title)), inputs(std::move(inputs)), outputs(std::move(outputs)) {}
 
 void NodeConfig::setCode(std::string newCode) {
     this->baseCode = std::move(newCode);
 }
+
+
+
+
+/* ========== NODE ========== */
 
 Node::Node(const int i, const float v) : id(i), value(v) {}
 
@@ -78,6 +58,12 @@ void Node::setProcessedCode(std::string code) {
 }
 
 void Node::setConfig(NodeConfig newConfig) {
+    if (this->_type == PrivatePinType::CUSTOM) {
+        NodeIOPin previousVarnamePin("Connected to", true, SliderDataType::CODE);
+        NodeIOPin varnamePin("Name", true, SliderDataType::STRING);
+        newConfig.inputs.insert(newConfig.inputs.begin(), previousVarnamePin);
+        newConfig.inputs.insert(newConfig.inputs.begin(), varnamePin);
+    }
     this->setBaseCode(newConfig.baseCode);
     this->config = std::move(newConfig);
 }
@@ -91,6 +77,8 @@ void Node::replaceInputsWithValues(std::vector<std::pair<bool, std::array<int, 3
         int start  = io.second[1];
         int length = io.second[2];
 
+        std::cout << lineNo << " " << start << " " << length << "\n";
+
         std::stringstream ss(this->baseCode);
         std::string line;
         int linesNumber = 0;
@@ -100,19 +88,32 @@ void Node::replaceInputsWithValues(std::vector<std::pair<bool, std::array<int, 3
                 int funcNameSize = std::string("input(").length();
                 line.replace(start - funcNameSize, length + funcNameSize + 1, "1");
             }
-            this->processedCode += line + "\n";
+            this->processedCode += line + "\n\r";
+            std::cout << line;
             linesNumber++;
         }
     }
 }
 
-void Node::generateProcessedCode() {
-    auto ioCodePositions = Executor::getIOCodePositionsAndLengths(this->baseCode);
-    this->replaceInputsWithValues(ioCodePositions);
+void Node::generateProcessedCode(const std::vector<Link>& connections) {
+    if (this->_type == PrivatePinType::CUSTOM) {
+
+        auto ioCodePositions = Executor::getIOCodePositionsAndLengths(this->baseCode);
+        this->replaceInputsWithValues(ioCodePositions);
+
+        // Add reference to the previous node varname
+        std::cout << "Code: \"\n" << this->processedCode << "\"\n";
+
+    }
+
 }
 
 
 
+
+
+
+/* ========== LINK ========== */
 
 void Link::sort(std::vector<Node> nodes) {
     bool firstIsInput = false;
@@ -127,19 +128,23 @@ void Link::sort(std::vector<Node> nodes) {
         std::swap(this->start_attr, this->end_attr);
     }
 }
-
 Link::Link() : id(-1), start_attr(-1), end_attr(-1) {}
 Link::Link(int i, int start, int end) : id(i), start_attr(start), end_attr(end) {}
 
 
-std::vector<Link> Editor::getLinksOfNode(Node& node) {
+
+
+
+/* ========== EDITOR ========== */
+
+std::vector<Link> Editor::getLinksOfNode(Node &node) {
     std::vector<Link> result = {};
-    for (Link& link : this->links) {
+    for (Link &link : this->links) {
         bool startIsInput = VECTOR_CONTAINS(node.inputIds, link.start_attr);
-        bool endIsInput   = VECTOR_CONTAINS(node.inputIds, link.end_attr);
+        bool endIsInput = VECTOR_CONTAINS(node.inputIds, link.end_attr);
 
         bool startIsOutput = VECTOR_CONTAINS(node.outputIds, link.start_attr);
-        bool endIsOutput   = VECTOR_CONTAINS(node.outputIds, link.end_attr);
+        bool endIsOutput = VECTOR_CONTAINS(node.outputIds, link.end_attr);
 
         if (startIsInput || endIsInput || startIsOutput || endIsOutput) {
             result.push_back(link);
@@ -148,14 +153,14 @@ std::vector<Link> Editor::getLinksOfNode(Node& node) {
     return result;
 }
 
-std::pair<Link, bool> Editor::getLinkToPin(Node& node, int localPinId) {
+std::pair<Link, bool> Editor::getLinkToPin(Node &node, int localPinId) {
     int globalPinId = node.inputIds[localPinId];
     std::cout << "Global pin id: " << globalPinId << "\n";
     std::vector<Link> possibleLinks = this->getLinksOfNode(node);
 
     bool targetLinkFound = false;
     Link targetLink = possibleLinks[0]; // placeholder
-    for(Link link : possibleLinks) {
+    for (Link link : possibleLinks) {
         if (link.end_attr == globalPinId) {
             targetLink = link;
             targetLinkFound = true;
@@ -165,15 +170,15 @@ std::pair<Link, bool> Editor::getLinkToPin(Node& node, int localPinId) {
 }
 
 bool Editor::pinHasLink(int pinId) {
-    for (Link& link : this->links) {
+    for (Link &link : this->links) {
         if (link.start_attr == pinId || link.end_attr == pinId) return true;
     }
     return false;
 }
 
-std::pair<Node&, bool> Editor::getNodeThatHasPinById(int id) {
-    for (Node& _node : this->nodes) {
-        if(VECTOR_CONTAINS(_node.inputIds, id) || VECTOR_CONTAINS(_node.outputIds, id)) {
+std::pair<Node &, bool> Editor::getNodeThatHasPinById(int id) {
+    for (Node &_node : this->nodes) {
+        if (VECTOR_CONTAINS(_node.inputIds, id) || VECTOR_CONTAINS(_node.outputIds, id)) {
             return {_node, true};
         }
     }
@@ -181,7 +186,7 @@ std::pair<Node&, bool> Editor::getNodeThatHasPinById(int id) {
     return {placeholderNode, false};
 }
 
-std::pair<PinLocation, bool> Editor::getNextPinLocation(Node& node, int localPinId) { // returns: {{parent node id, local pin id}, was found?}
+std::pair<PinLocation, bool> Editor::getNextPinLocation(Node &node, int localPinId) { // returns: {{parent node id, local pin id}, was found?}
 
     auto linkData = this->getLinkToPin(node, localPinId);
     std::cout << linkData.first.start_attr << " " << linkData.second << "\n";
@@ -198,5 +203,5 @@ std::pair<PinLocation, bool> Editor::getNextPinLocation(Node& node, int localPin
         }
     }
     std::cout << "Link not found for: " << node.config.title << "\n";
-    return {{-1,-1}, false};
+    return {{-1, -1}, false};
 }

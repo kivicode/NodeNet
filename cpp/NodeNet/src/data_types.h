@@ -10,6 +10,12 @@
 #include <vector>
 #include <imnodes.h>
 #include <map>
+#include <any>
+
+
+class Node;
+class Link;
+class Editor;
 
 
 enum SliderDataType : int {
@@ -62,6 +68,7 @@ public:
 };
 
 
+
 class Node {
 public:
     int id;
@@ -78,8 +85,8 @@ public:
     std::vector<int>  inputIds = {};
     std::vector<int> outputIds = {};
 
-    std::map<int, float>  inputs = {};
-    std::map<int, float> outputs = {};
+    std::map<int, std::pair<float, std::string>>  inputs = {};
+    std::map<int, std::pair<float, std::string>> outputs = {};
 
     Node(int i, float v);
 
@@ -93,7 +100,7 @@ public:
 
     void replaceInputsWithValues(std::vector<std::pair<bool, std::array<int, 3>>>& ioCodePositions);
 
-    void generateProcessedCode();
+    void generateProcessedCode(const std::vector<Link>&);
 
 };
 

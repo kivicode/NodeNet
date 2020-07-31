@@ -1,4 +1,4 @@
-a = input("abc")
-b = input("lol")
+input("Name") = \
+Dense(input("Units"))
 
 output("qwqw", 12)

@@ -2,6 +2,8 @@
 // Created by  KiviCode on 26/07/2020.
 //
 
+#pragma once
+
 #include "imnodes.h"
 #include "imgui.h"
 
@@ -9,7 +11,9 @@
 #include "settings.h"
 #include "templates.h"
 
-#include "utils.cpp"
+#include "utils.h"
+#include <any>
+
 
 namespace NodeGenerator {
 
@@ -29,7 +33,8 @@ namespace NodeGenerator {
                 int pinId = node.id + (MAX_PINS * (i + 1));
                 bool hasVal = MAP_HAS_KEY(node.inputs, pinId);
                 if (!hasVal) {
-                    node.inputs[pinId] = 0;
+                    node.inputs[pinId].first  = 0;
+                    node.inputs[pinId].second = "";
                     node.inputIds.push_back(pinId);
 #ifdef DEBUG
                     std::cout << "Create input for node: " << config.title.c_str() << "  Input name: " << config.inputs[i].name << " id: " << pinId << "\n";
@@ -52,23 +57,21 @@ namespace NodeGenerator {
 
                     switch(config.inputs[i].dataType) {
                         case SliderDataType::FLOAT:
-                            ImGui::DragFloat("##hidelabel", &node.inputs[pinId],
+                            ImGui::DragFloat("##hidelabel", &node.inputs[pinId].first,
                                                                   config.inputs[i].sliderSpeed,
                                                                   config.inputs[i].minSliderVal,
                                                                   config.inputs[i].maxSliderVal);
                             break;
 
                         case SliderDataType::INTEGER:
-                            ImGui::DragInt("##hidelabel", reinterpret_cast<int *>(&node.inputs[pinId]),
+                            ImGui::DragInt("##hidelabel", reinterpret_cast<int *>(&node.inputs[pinId].first),
                                            config.inputs[i].sliderSpeed,
                                            (int)config.inputs[i].minSliderVal,
                                            (int)config.inputs[i].maxSliderVal);
                             break;
 
                         case SliderDataType::STRING:
-                            if(node._type != PrivatePinType::CUSTOM) {
-                                ImGui::InputText("##hidelabel", reinterpret_cast<char *>(node.modelName), 1024);
-                            }
+                            ImGui::InputText("##hidelabel", reinterpret_cast<char *>(&node.inputs[pinId].second), 1024);
                             break;
 
                         default:
@@ -88,7 +91,8 @@ namespace NodeGenerator {
                 int pinId = GET_OUTPUT_ID(node, i);
                 bool hasVal = MAP_HAS_KEY(node.outputs, pinId);
                 if (!hasVal) {
-                    node.outputs[pinId] = 0;
+                    node.outputs[pinId].first  = 0;
+                    node.outputs[pinId].second = "";
                     node.outputIds.push_back(pinId);
 #ifdef DEBUG
                     std::cout << "Create output for node: " << config.title.c_str() << "  Output name: " << config.outputs[i].name << " id: " << pinId << "\n";
@@ -113,19 +117,19 @@ namespace NodeGenerator {
 
     void buildTestNode(Node& node, const std::string& path) {
         node._type = PrivatePinType::CUSTOM;
-        test_config.baseCode = readFile(path);
+        test_config.setCode(readFile(path));
         node.setConfig(test_config);
     }
 
     void buildFinishNode(Node& node, const std::string& path) {
         node._type = PrivatePinType::FINISH;
-        finish_config.baseCode = readFile(path);
+        finish_config.setCode(readFile(path));
         node.setConfig(finish_config);
     }
 
     void buildStartNode(Node& node, const std::string& path) {
         node._type = PrivatePinType::START;
-        start_config.baseCode = readFile(path);
+        start_config.setCode(readFile(path));
         node.setConfig(start_config);
     }
 
