@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(NodeNet)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 include_directories(.)
 include_directories(bin)
@@ -36,7 +36,6 @@ add_executable(NodeNet
         build/gmake/obj/Debug/imnodes/imnodes.o
         build/gmake/obj/Debug/node/main.d
         build/gmake/obj/Debug/node/main.o
-        build/gmake/obj/Debug/node/node_editor.d
         build/gmake/gl3w.make
         build/gmake/imgui.make
         build/gmake/imnodes.make

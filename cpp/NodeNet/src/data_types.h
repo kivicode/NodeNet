@@ -67,6 +67,19 @@ public:
     void setCode(std::string newCode);
 };
 
+struct IOData {
+    std::string s;
+    float f;
+    int i;
+
+    SliderDataType dtype;
+
+    void empty() {
+        this->s = "";
+        this->f = 0;
+        this->i = 0;
+    }
+};
 
 
 class Node {
@@ -88,20 +101,22 @@ public:
     std::map<int, std::pair<float, std::string>>  inputs = {};
     std::map<int, std::pair<float, std::string>> outputs = {};
 
+    std::any test;
+
     Node(int i, float v);
 
-    std::pair<int, bool> globalPinIdToLocal(int globalId) const;
+    [[nodiscard]] std::pair<int, bool> globalPinIdToLocal(int globalId) const;
 
     void setBaseCode(std::string code);
-
-    void setProcessedCode(std::string code);
-
     void setConfig(NodeConfig newConfig);
-
-    void replaceInputsWithValues(std::vector<std::pair<bool, std::array<int, 3>>>& ioCodePositions);
-
     void generateProcessedCode(const std::vector<Link>&);
 
+private:
+
+    int inputIdByName(std::string& name);
+    std::any getInputValueById(int index);
+    void setProcessedCode(std::string code);
+    void replaceInputsWithValues();
 };
 
 class Link {

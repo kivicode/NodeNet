@@ -5,15 +5,16 @@
 #ifndef NODENET_EXECTOR_H
 #define NODENET_EXECTOR_H
 
-#include <stdio.h>
+#include <cstdio>
 #include <regex>
 #include <array>
 #include <sstream>
+#include <iostream>
 
 namespace Executor {
 
-    std::regex find_input_call_regex(R"((?:.*)\ *=\ *?input+\((.*)\))");
-    std::regex find_output_call_regex(R"((?:\ *)output+\((.*)\))");
+    std::regex find_input_call_regex( R"(input+\()");
+    std::regex find_output_call_regex(R"(output+\()");
 
     std::vector<std::array<int, 3>> findRegexInCode(std::string baseCode, std::regex regex) { // {line number, character index (inside the line), substring length}
         std::vector<std::array<int, 3>> output = {};
@@ -34,7 +35,28 @@ namespace Executor {
         return output;
     }
 
-    std::vector<std::pair<bool, std::array<int, 3>>> getIOCodePositionsAndLengths( std::string baseCode) { // <bool, {int, int, int}> ==> <isInput, {line number, character index (inside the line), substring length}>
+    int getClosingBracketPos(std::string& line, int startPos, bool openBracketIncluded) {
+        if (!openBracketIncluded) startPos++;
+        int shift = 0;
+        int internalBracketsBuff = 0;
+
+        for (char ch : line.substr(startPos, line.size())) {
+            if (ch == ')' && internalBracketsBuff == 0) break;
+            if (ch == '(') internalBracketsBuff++;
+            shift++;
+        }
+
+        return startPos + shift - 1; // -1 in order not to include the closing bracket
+    }
+
+    int firstCharMatch(std::string& str, char ch) {
+        for(int i = 0; i < str.size(); i++) {
+            if (str.at(i) == ch) return i;
+        }
+        return -1;
+    }
+
+    std::vector<std::pair<bool, std::array<int, 3>>> getIOCodePositionsAndLengths( const std::string& baseCode) { // <bool, {int, int, int}> ==> <isInput, {line number, character index (inside the line), substring length}>
 
         std::vector<std::pair<bool, std::array<int, 3>>> output = {};
 

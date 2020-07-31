@@ -50,7 +50,6 @@ std::string readFile(const std::string& path) {
     }
 
     file.close();
-    std::cout << "Read: " << output << "\n";
     return output;
 }
 

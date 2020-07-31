@@ -48,6 +48,25 @@ std::pair<int, bool> Node::globalPinIdToLocal(int globalId) const {
     return {-1, false};
 }
 
+int Node::inputIdByName(std::string& name) {
+    int i = 0;
+    for(const NodeIOPin& pin : this->config.inputs) {
+        if (pin.name == name) return i;
+        i++;
+    }
+    return -1;
+}
+
+std::any Node::getInputValueById(int index) {
+    auto pinType = this->config.inputs[index].dataType;
+    if(pinType == SliderDataType::INTEGER || pinType == SliderDataType::FLOAT) {
+        return this->inputs[index].first;
+    } else if(pinType == SliderDataType::STRING) {
+        return this->inputs[index].second;
+    }
+    return 0;
+}
+
 void Node::setBaseCode(std::string code) {
     this->baseCode = std::move(code);
     this->processedCode = this->baseCode;
@@ -68,38 +87,56 @@ void Node::setConfig(NodeConfig newConfig) {
     this->config = std::move(newConfig);
 }
 
-void Node::replaceInputsWithValues(std::vector<std::pair<bool, std::array<int, 3>>>& ioCodePositions) {
+void Node::replaceInputsWithValues() {
     this->processedCode = "";
-    for (std::pair<bool, std::array<int, 3>> io : ioCodePositions) {
-        bool isInput = io.first;
 
-        int lineNo = io.second[0];
-        int start  = io.second[1];
-        int length = io.second[2];
+    std::stringstream ss(this->baseCode);
+    std::string line;
+    int linesNumber = 0;
 
-        std::cout << lineNo << " " << start << " " << length << "\n";
+    while (std::getline(ss, line, '\n')) { // iterate over lines
 
-        std::stringstream ss(this->baseCode);
-        std::string line;
-        int linesNumber = 0;
+        const std::regex regex(R"(input\((.*)\))");
+        std::smatch sm;
 
-        while (std::getline(ss, line, '\n')) { // iterate over lines
-            if (linesNumber == lineNo and isInput) {
-                int funcNameSize = std::string("input(").length();
-                line.replace(start - funcNameSize, length + funcNameSize + 1, "1");
+        bool flag = true;
+
+        int n = 0;
+
+        while (regex_search(line, sm, regex)) {
+
+            int L = (int)std::string("input(\"").size() - 1;
+            auto match = sm[1];
+            int pos = sm.position(1);
+            int endPos = Executor::getClosingBracketPos(line, pos, false);
+
+            std::string name = line.substr(pos + 1, endPos - 1);
+            int nameEndPos = Executor::firstCharMatch(name, ')') - 1;
+            name = name.substr(0, nameEndPos);
+            std::any val = this->getInputValueById(this->inputIdByName(name));
+
+            bool isString = val.type() == typeid(std::string);
+
+            if (isString) {
+                std::cout << "Name: \"" << name << "\"  Val: " << std::any_cast<std::string>(val) << "\n";
+            } else {
+                std::cout << "Name: \"" << name << "\"  Val: " << std::any_cast<float>(val) << "\n";
             }
-            this->processedCode += line + "\n\r";
-            std::cout << line;
-            linesNumber++;
+
+            line.erase(pos - L, endPos - (pos - L) + 2);
+            line.insert(pos - L, "[{|}]");
+
+            if(++n == MAX_INLINE_PIN_DECLARATIONS) break;
         }
+
+        this->processedCode += line + "\n";
     }
 }
 
 void Node::generateProcessedCode(const std::vector<Link>& connections) {
     if (this->_type == PrivatePinType::CUSTOM) {
 
-        auto ioCodePositions = Executor::getIOCodePositionsAndLengths(this->baseCode);
-        this->replaceInputsWithValues(ioCodePositions);
+        this->replaceInputsWithValues();
 
         // Add reference to the previous node varname
         std::cout << "Code: \"\n" << this->processedCode << "\"\n";

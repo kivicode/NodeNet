@@ -1,4 +1,2 @@
-input("Name") = \
-Dense(input("Units"))
-
+input("Name") = Dense(input("Units"))
 output("qwqw", 12)
