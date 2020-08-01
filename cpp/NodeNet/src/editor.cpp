@@ -102,14 +102,15 @@ namespace graphics {
         }
 
         if (ImGui::BeginPopup("Spawn node")) {
-            if      (ImGui::MenuItem("Input node")) {
+            if (ImGui::MenuItem("Input node")) {
 
                 const int node_id = ++editor.current_id;
                 imnodes::SetNodeScreenSpacePos(node_id, ImGui::GetMousePos());
                 Node node = Node(node_id, 0.f);
                 editor.nodes.push_back(node);
                 editor.inputNodeIds.push_back(node.id);
-                NodeGenerator::buildStartNode(editor.nodes[editor.nodes.size()-1], "");
+                NodeGenerator::buildStartNode(editor.nodes[editor.nodes.size() - 1],
+                                            "/Users/kivicode/Documents/GitHub/NodeNet/cpp/NodeNet/templates/start.node");
 #ifdef DEBUG
                 std::cout << "Create node: " << node_id << "\n";
 #endif
@@ -120,7 +121,8 @@ namespace graphics {
                 imnodes::SetNodeScreenSpacePos(node_id, ImGui::GetMousePos());
                 Node node = Node(node_id, 0.f);
                 editor.nodes.push_back(node);
-                NodeGenerator::buildTestNode(editor.nodes[editor.nodes.size()-1], "/Users/kivicode/Documents/GitHub/NodeNet/cpp/NodeNet/templates/test.node");
+                NodeGenerator::buildTestNode(editor.nodes[editor.nodes.size() - 1],
+                                             "/Users/kivicode/Documents/GitHub/NodeNet/cpp/NodeNet/templates/test.node");
 
 #ifdef DEBUG
                 std::cout << "Create node: " << node_id << "\n";
@@ -132,7 +134,9 @@ namespace graphics {
                 imnodes::SetNodeScreenSpacePos(node_id, ImGui::GetMousePos());
                 Node node = Node(node_id, 0.f);
                 editor.nodes.push_back(node);
-                NodeGenerator::buildFinishNode(editor.nodes[editor.nodes.size()-1], "");
+                editor.finishNodeIds.push_back(node.id - 1);
+                NodeGenerator::buildFinishNode(editor.nodes[editor.nodes.size() - 1],
+                                               "/Users/kivicode/Documents/GitHub/NodeNet/cpp/NodeNet/templates/finish.node");
 #ifdef DEBUG
                 std::cout << "Create node: " << node_id << "\n";
 #endif
@@ -144,7 +148,9 @@ namespace graphics {
     void debug() {
         if (ImGui::IsKeyReleased(SDL_SCANCODE_K)) {
             std::cout << "\n\n";
-            editor.nodes[0].generateProcessedCode(editor.getLinksOfNode(editor.nodes[0]));
+            int i = editor.finishNodeIds[0];
+            std::string finalCode = editor.nodes[i].generateProcessedCode(editor);
+            std::cout << "\n\nCode:\"\n" << finalCode << "\"\n";
         }
     }
 

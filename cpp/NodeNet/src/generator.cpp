@@ -29,18 +29,6 @@ namespace NodeGenerator {
 
         // Inputs
         {
-            for (int i = 0; i < config.inputs.size(); i++) { // init start values
-                int pinId = node.id + (MAX_PINS * (i + 1));
-                bool hasVal = MAP_HAS_KEY(node.inputs, pinId);
-                if (!hasVal) {
-                    node.inputs[pinId].empty();
-                    node.inputIds.push_back(pinId);
-#ifdef DEBUG
-                    std::cout << "Create input for node: " << config.title.c_str() << "  Input name: " << config.inputs[i].name << " id: " << pinId << "\n";
-#endif
-                }
-            }
-
             for (int i = 0; i < config.inputs.size(); i++) {
                 std::string pinName = config.inputs[i].name;
                 int pinId = GET_INPUT_ID(node, i);
@@ -86,18 +74,6 @@ namespace NodeGenerator {
 
         // Outputs
         {
-            for (int i = 0; i < config.outputs.size(); i++) { // init start values
-                int pinId = GET_OUTPUT_ID(node, i);
-                bool hasVal = MAP_HAS_KEY(node.outputs, pinId);
-                if (!hasVal) {
-                    node.outputs[pinId].empty();
-                    node.outputIds.push_back(pinId);
-#ifdef DEBUG
-                    std::cout << "Create output for node: " << config.title.c_str() << "  Output name: " << config.outputs[i].name << " id: " << pinId << "\n";
-#endif
-                }
-            }
-
             for (int i = 0; i < config.outputs.size(); i++) { // draw node staff
                 std::string pinName = config.outputs[i].name;
                 int pinId = GET_OUTPUT_ID(node, i);
@@ -113,22 +89,25 @@ namespace NodeGenerator {
         imnodes::EndNode();
     }
 
-    void buildTestNode(Node& node, const std::string& path) {
+    void buildTestNode(Node &node, const std::string &path) {
         node._type = PrivatePinType::CUSTOM;
         test_config.setCode(readFile(path));
         node.setConfig(test_config);
+        node.init();
     }
 
-    void buildFinishNode(Node& node, const std::string& path) {
+    void buildFinishNode(Node &node, const std::string &path) {
         node._type = PrivatePinType::FINISH;
         finish_config.setCode(readFile(path));
         node.setConfig(finish_config);
+        node.init();
     }
 
-    void buildStartNode(Node& node, const std::string& path) {
+    void buildStartNode(Node &node, const std::string &path) {
         node._type = PrivatePinType::START;
         start_config.setCode(readFile(path));
         node.setConfig(start_config);
+        node.init();
     }
 
 }

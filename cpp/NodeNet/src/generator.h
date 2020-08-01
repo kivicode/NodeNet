@@ -12,9 +12,9 @@
 namespace NodeGenerator {
 
     void generateFromConfig(Editor& editor, Node& node, NodeConfig& config);
-    void buildTestNode(Node& node, const std::string& path);
-    void buildFinishNode(Node& node, const std::string& path);
-    void buildStartNode(Node& node, const std::string& path);
+    void buildTestNode(Node &node, const std::string &path);
+    void buildFinishNode(Node &node, const std::string &path);
+    void buildStartNode(Node &node, const std::string &path);
 
 }
 

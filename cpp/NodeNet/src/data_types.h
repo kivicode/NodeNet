@@ -42,6 +42,8 @@ public:
     float maxSliderVal = 1;
     float sliderSpeed = .1;
 
+    bool isStaff = false;
+
     NodeIOPin(std::string name, bool isEditable);
 
     NodeIOPin(std::string name, bool isEditable, SliderDataType dataType);
@@ -86,7 +88,6 @@ class Node {
 public:
     int id;
     float value;
-    char* modelName[1024] = {0};
 
     std::string baseCode = "";
     std::string processedCode = "";
@@ -109,14 +110,18 @@ public:
 
     void setBaseCode(std::string code);
     void setConfig(NodeConfig newConfig);
-    void generateProcessedCode(const std::vector<Link>&);
+    std::string generateProcessedCode(Editor& editor);
+    void init();
 
 private:
 
+    std::string getInputName(Editor &editor);
     int inputIdByName(std::string& name);
-    std::any getInputValueById(int index);
+    std::any getInputValueById(Editor &editor, int index);
     void setProcessedCode(std::string code);
-    void replaceInputsWithValues();
+    void replaceInputsWithValues(Editor &editor);
+    void deleteOutputsFromCode();
+    static std::string getPrevVarname(Editor &editor, std::pair<Link, bool> link);
 };
 
 class Link {
@@ -141,6 +146,8 @@ public:
 
     int current_id = 0;
 
+    std::vector<Link> getLinksFromNode(Node& node);
+    std::vector<Link> getLinksToNode(Node& node);
     std::vector<Link> getLinksOfNode(Node& node);
 
     std::pair<Link, bool> getLinkToPin(Node& node, int localPinId);

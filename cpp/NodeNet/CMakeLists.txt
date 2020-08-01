@@ -75,6 +75,7 @@ add_executable(NodeNet
         lib/Debug/libimnodes.a
         src/main.cpp
         src/editor.h
+        src/editor.cpp
         imgui.ini
         imnodes.cpp
         imnodes.h

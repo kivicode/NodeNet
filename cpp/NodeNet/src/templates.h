@@ -9,12 +9,12 @@
 
 std::vector<NodeIOPin> testInputs =  {NodeIOPin("Units", true, SliderDataType::INTEGER, 0, 1000, 1)};
 std::vector<NodeIOPin> testOutputs = {NodeIOPin("output", false)};
-NodeConfig test_config = NodeConfig("abc", testInputs, testOutputs);
+NodeConfig test_config = NodeConfig("Dense", testInputs, testOutputs);
 
-std::vector<NodeIOPin> finish_inputs =  {NodeIOPin("Code", false), NodeIOPin("Model name", true, SliderDataType::STRING)};
+std::vector<NodeIOPin> finish_inputs =  {};
 NodeConfig finish_config = NodeConfig("Finish", finish_inputs, std::vector<NodeIOPin>{});
 
-std::vector<NodeIOPin> start_inputs =  {};
+std::vector<NodeIOPin> start_inputs =  {NodeIOPin("Name", true, STRING), NodeIOPin("Size", true, INTEGER)};
 std::vector<NodeIOPin> start_outputs = {NodeIOPin("", false)};
 NodeConfig start_config = NodeConfig("Input", start_inputs, start_outputs);
 
