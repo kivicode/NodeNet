@@ -21,6 +21,42 @@ namespace graphics {
     void show_editor(const char *editor_name, Editor &editor) {
         imnodes::EditorContextSet(editor.context);
 
+        // Dockspace frame creation
+        {
+            ImGuiViewport *viewport = ImGui::GetMainViewport();
+            ImGui::SetNextWindowPos(viewport->Pos);
+            ImGui::SetNextWindowSize(viewport->Size);
+            ImGui::SetNextWindowViewport(viewport->ID);
+            ImGui::SetNextWindowBgAlpha(0.0f);
+
+            ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+            window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+                            ImGuiWindowFlags_NoMove;
+            window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+            bool p_open = true;
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+            ImGui::Begin("DockSpace Demo", &p_open, window_flags);
+            ImGui::PopStyleVar(3);
+
+            ImGuiID dockspace_id = ImGui::GetID("Dockspace");
+            ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
+            ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+
+            ImGui::End();
+        }
+
+        for(int i = 0; i < 3; i++) {
+            std::string name = "test" + std::to_string(i);
+            ImGui::Begin(name.c_str());
+            ImGuiID dockspace_id = ImGui::GetID(name.c_str());
+            ImGui::DockSpace(dockspace_id);
+            ImGui::End();
+        }
+
+
         ImGui::Begin(editor_name);
 
         imnodes::BeginNodeEditor();

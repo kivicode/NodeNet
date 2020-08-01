@@ -205,7 +205,7 @@
 //    the current point based on that.
 //
 //  Displaying a character:
-//    Compute the bounding box of the character. It will contain signed inputs
+//    Compute the bounding box of the character. It will contain signed values
 //    relative to <current_point, baseline>. I.e. if it returns x0,y0,x1,y1,
 //    then the character should be displayed in the rectangle from
 //    <current_point+SF*x0, baseline+SF*y0> to <current_point+SF*x1,baseline+SF*y1).
@@ -606,7 +606,7 @@ STBTT_DEF int  stbtt_PackFontRange(stbtt_pack_context *spc, const unsigned char 
                                 int first_unicode_char_in_range, int num_chars_in_range, stbtt_packedchar *chardata_for_range);
 // Creates character bitmaps from the font_index'th font found in fontdata (use
 // font_index=0 if you don't know what that is). It creates num_chars_in_range
-// bitmaps for characters with unicode inputs starting at first_unicode_char_in_range
+// bitmaps for characters with unicode values starting at first_unicode_char_in_range
 // and increasing. Data for how to render them is stored in chardata_for_range;
 // pass these to stbtt_GetPackedQuad to get back renderable quads.
 //
@@ -778,7 +778,7 @@ STBTT_DEF void stbtt_GetFontVMetrics(const stbtt_fontinfo *info, int *ascent, in
 //   the scale factor for a given size
 
 STBTT_DEF int  stbtt_GetFontVMetricsOS2(const stbtt_fontinfo *info, int *typoAscent, int *typoDescent, int *typoLineGap);
-// analogous to GetFontVMetrics, but returns the "typographic" inputs from the OS/2
+// analogous to GetFontVMetrics, but returns the "typographic" values from the OS/2
 // table (specific to MS/Windows TTF files).
 //
 // Returns 1 on success (table present), 0 on failure.
@@ -809,7 +809,7 @@ STBTT_DEF int  stbtt_GetGlyphBox(const stbtt_fontinfo *info, int glyph_index, in
 // the bitmaps for C declaration-order reasons)
 //
 
-#ifndef STBTT_vmove // you can predefine these to use different inputs (but why?)
+#ifndef STBTT_vmove // you can predefine these to use different values (but why?)
    enum {
       STBTT_vmove=1,
       STBTT_vline,
@@ -818,7 +818,7 @@ STBTT_DEF int  stbtt_GetGlyphBox(const stbtt_fontinfo *info, int glyph_index, in
    };
 #endif
 
-#ifndef stbtt_vertex // you can predefine this to use different inputs
+#ifndef stbtt_vertex // you can predefine this to use different values
                    // (we share this with other code at RAD)
    #define stbtt_vertex_type short // can't use stbtt_int16 because that's not visible in the header file
    typedef struct
@@ -947,7 +947,7 @@ STBTT_DEF unsigned char * stbtt_GetCodepointSDF(const stbtt_fontinfo *info, floa
 //
 // pixel_dist_scale & onedge_value are a scale & bias that allows you to make
 // optimal use of the limited 0..255 for your application, trading off precision
-// and special effects. SDF inputs outside the range 0..255 are clamped to 0..255.
+// and special effects. SDF values outside the range 0..255 are clamped to 0..255.
 //
 // Example:
 //      scale = stbtt_ScaleForPixelHeight(22)
@@ -1020,7 +1020,7 @@ STBTT_DEF const char *stbtt_GetFontNameString(const stbtt_fontinfo *font, int *l
 // returns the string (which may be big-endian double byte, e.g. for unicode)
 // and puts the length in bytes in *length.
 //
-// some of the inputs for the IDs are below; for more see the truetype spec:
+// some of the values for the IDs are below; for more see the truetype spec:
 //     http://developer.apple.com/textfonts/TTRefMan/RM06/Chap6name.html
 //     http://www.microsoft.com/typography/otspec/name.htm
 
@@ -1789,7 +1789,7 @@ static int stbtt__GetGlyphShapeTT(const stbtt_fontinfo *info, int glyph_index, s
          flags = ttSHORT(comp); comp+=2;
          gidx = ttSHORT(comp); comp+=2;
 
-         if (flags & 2) { // XY inputs
+         if (flags & 2) { // XY values
             if (flags & 1) { // shorts
                mtx[4] = ttSHORT(comp); comp+=2;
                mtx[5] = ttSHORT(comp); comp+=2;
@@ -3018,7 +3018,7 @@ static void stbtt__fill_active_edges_new(float *scanline, float *scanline_fill, 
          }
 
          if (x_top >= 0 && x_bottom >= 0 && x_top < len && x_bottom < len) {
-            // from here on, we don't have to range check x inputs
+            // from here on, we don't have to range check x values
 
             if ((int) x_top == (int) x_bottom) {
                float height;
@@ -4046,7 +4046,7 @@ STBTT_DEF int stbtt_PackFontRangesRenderIntoRects(stbtt_pack_context *spc, const
 {
    int i,j,k, return_value = 1;
 
-   // save current inputs
+   // save current values
    int old_h_over = spc->h_oversample;
    int old_v_over = spc->v_oversample;
 
@@ -4117,7 +4117,7 @@ STBTT_DEF int stbtt_PackFontRangesRenderIntoRects(stbtt_pack_context *spc, const
       }
    }
 
-   // restore original inputs
+   // restore original values
    spc->h_oversample = old_h_over;
    spc->v_oversample = old_v_over;
 

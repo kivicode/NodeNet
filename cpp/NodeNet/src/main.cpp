@@ -92,9 +92,21 @@ int main(int, char**)
 		}
 
 		// Start the Dear ImGui frame
-		ImGui_ImplOpenGL3_NewFrame();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+
+        ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplSDL2_NewFrame(window);
+
+
 		ImGui::NewFrame();
+
+
+
+
+//        ImGuiID dockspace_id = ImGui::GetID("Dockspace");
+//        ImGui::DockSpace(dockspace_id);
 
 		if (!initialized)
 		{

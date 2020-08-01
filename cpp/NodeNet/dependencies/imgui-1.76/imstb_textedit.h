@@ -182,7 +182,7 @@
 // You can encode other things, such as CONTROL or ALT, in additional bits, and
 // then test for their presence in e.g. STB_TEXTEDIT_K_WORDLEFT. For example,
 // my Windows implementations add an additional CONTROL bit, and an additional KEYDOWN
-// bit. Then all of the STB_TEXTEDIT_K_ inputs bitwise-or in the KEYDOWN bit,
+// bit. Then all of the STB_TEXTEDIT_K_ values bitwise-or in the KEYDOWN bit,
 // and I pass both WM_KEYDOWN and WM_CHAR events to the "key" function in the
 // API below. The control keys will only match WM_KEYDOWN events because of the
 // keydown bit I add, and STB_TEXTEDIT_KEYTOTEXT only tests for the KEYDOWN
