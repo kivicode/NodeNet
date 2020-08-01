@@ -33,8 +33,7 @@ namespace NodeGenerator {
                 int pinId = node.id + (MAX_PINS * (i + 1));
                 bool hasVal = MAP_HAS_KEY(node.inputs, pinId);
                 if (!hasVal) {
-                    node.inputs[pinId].first  = 0;
-                    node.inputs[pinId].second = "";
+                    node.inputs[pinId].empty();
                     node.inputIds.push_back(pinId);
 #ifdef DEBUG
                     std::cout << "Create input for node: " << config.title.c_str() << "  Input name: " << config.inputs[i].name << " id: " << pinId << "\n";
@@ -57,21 +56,21 @@ namespace NodeGenerator {
 
                     switch(config.inputs[i].dataType) {
                         case SliderDataType::FLOAT:
-                            ImGui::DragFloat("##hidelabel", &node.inputs[pinId].first,
+                            ImGui::DragFloat("##hidelabel", &node.inputs[pinId].f,
                                                                   config.inputs[i].sliderSpeed,
                                                                   config.inputs[i].minSliderVal,
                                                                   config.inputs[i].maxSliderVal);
                             break;
 
                         case SliderDataType::INTEGER:
-                            ImGui::DragInt("##hidelabel", reinterpret_cast<int *>(&node.inputs[pinId].first),
+                            ImGui::DragInt("##hidelabel", &node.inputs[pinId].i,
                                            config.inputs[i].sliderSpeed,
                                            (int)config.inputs[i].minSliderVal,
                                            (int)config.inputs[i].maxSliderVal);
                             break;
 
                         case SliderDataType::STRING:
-                            ImGui::InputText("##hidelabel", reinterpret_cast<char *>(&node.inputs[pinId].second), 1024);
+                            ImGui::InputText("##hidelabel", node.inputs[pinId].s, INPUT_BUFF_SIZE);
                             break;
 
                         default:
@@ -91,8 +90,7 @@ namespace NodeGenerator {
                 int pinId = GET_OUTPUT_ID(node, i);
                 bool hasVal = MAP_HAS_KEY(node.outputs, pinId);
                 if (!hasVal) {
-                    node.outputs[pinId].first  = 0;
-                    node.outputs[pinId].second = "";
+                    node.outputs[pinId].empty();
                     node.outputIds.push_back(pinId);
 #ifdef DEBUG
                     std::cout << "Create output for node: " << config.title.c_str() << "  Output name: " << config.outputs[i].name << " id: " << pinId << "\n";

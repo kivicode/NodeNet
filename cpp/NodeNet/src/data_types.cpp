@@ -59,10 +59,24 @@ int Node::inputIdByName(std::string& name) {
 
 std::any Node::getInputValueById(int index) {
     auto pinType = this->config.inputs[index].dataType;
-    if(pinType == SliderDataType::INTEGER || pinType == SliderDataType::FLOAT) {
-        return this->inputs[index].first;
-    } else if(pinType == SliderDataType::STRING) {
-        return this->inputs[index].second;
+    index = this->inputIds[index];
+
+    switch(pinType) {
+
+        case INTEGER: {
+            printf("%d:: %d\n", index, this->inputs[index].i);
+            return this->inputs[index].i;
+        }
+
+        case FLOAT: {
+            return this->inputs[index].f;
+        }
+        case STRING: {
+            return this->inputs[index].s;
+        }
+
+        default:
+            break;
     }
     return 0;
 }
@@ -115,16 +129,17 @@ void Node::replaceInputsWithValues() {
             name = name.substr(0, nameEndPos);
             std::any val = this->getInputValueById(this->inputIdByName(name));
 
-            bool isString = val.type() == typeid(std::string);
+            std::string stringVal;
 
-            if (isString) {
-                std::cout << "Name: \"" << name << "\"  Val: " << std::any_cast<std::string>(val) << "\n";
+            if (val.type() == typeid(char*)) {
+                stringVal = std::string((std::any_cast<char *>(val)));
             } else {
-                std::cout << "Name: \"" << name << "\"  Val: " << std::any_cast<float>(val) << "\n";
+                if (val.type() == typeid(float))    stringVal = std::to_string(std::any_cast<float>(val));
+                else if (val.type() == typeid(int)) stringVal = std::to_string(std::any_cast<int>(val));
             }
 
             line.erase(pos - L, endPos - (pos - L) + 2);
-            line.insert(pos - L, "[{|}]");
+            line.insert(pos - L, stringVal);
 
             if(++n == MAX_INLINE_PIN_DECLARATIONS) break;
         }

@@ -68,14 +68,14 @@ public:
 };
 
 struct IOData {
-    std::string s;
+    char s[INPUT_BUFF_SIZE];
     float f;
     int i;
 
     SliderDataType dtype;
 
     void empty() {
-        this->s = "";
+        strcpy(this->s, "");
         this->f = 0;
         this->i = 0;
     }
@@ -98,8 +98,8 @@ public:
     std::vector<int>  inputIds = {};
     std::vector<int> outputIds = {};
 
-    std::map<int, std::pair<float, std::string>>  inputs = {};
-    std::map<int, std::pair<float, std::string>> outputs = {};
+    std::map<int, IOData>  inputs = {};
+    std::map<int, IOData> outputs = {};
 
     std::any test;
 
