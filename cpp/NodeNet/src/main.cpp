@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <SDL2/SDL.h>
 #include <GL/gl3w.h>
+#include <dependencies/imgui-1.76/imgui_internal.h>
 
 
 int main(int, char**)
@@ -40,7 +41,7 @@ int main(int, char**)
 	SDL_DisplayMode current;
 	SDL_GetCurrentDisplayMode(0, &current);
 	SDL_Window* window = SDL_CreateWindow(
-		"imgui-node-editor example",
+		"NodeNet",
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
 		1280,
@@ -78,6 +79,8 @@ int main(int, char**)
 		glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
 	}
 
+	bool dockspaceBuilt = false;
+
 	while (!done)
 	{
 		SDL_Event event;
@@ -95,6 +98,7 @@ int main(int, char**)
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+        io.ConfigWindowsMoveFromTitleBarOnly = true;
 
         ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplSDL2_NewFrame(window);
@@ -103,10 +107,55 @@ int main(int, char**)
 		ImGui::NewFrame();
 
 
+        if (!dockspaceBuilt) {
+            ImGuiViewport *viewport = ImGui::GetMainViewport();
+            ImGui::SetNextWindowPos(viewport->Pos);
+            ImGui::SetNextWindowSize(viewport->Size);
+            ImGui::SetNextWindowViewport(viewport->ID);
+            ImGui::SetNextWindowBgAlpha(0.0f);
+
+            ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+            window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+                            ImGuiWindowFlags_NoMove;
+            window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+            bool p_open = true;
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+            ImGui::Begin("Dockspace", &p_open, window_flags);
+
+            ImGui::BeginChild("", ImVec2(0,0), true, ImGuiWindowFlags_NoMove);
+            ImGui::PopStyleVar(3);
+
+            ImGuiID dockspace_id = ImGui::GetID("Dockspace");
+            ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
+            ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 
 
-//        ImGuiID dockspace_id = ImGui::GetID("Dockspace");
-//        ImGui::DockSpace(dockspace_id);
+            ImGui::DockBuilderRemoveNode(dockspace_id); // Clear out existing layout
+            ImGui::DockBuilderAddNode(dockspace_id, dockspace_flags); // Add empty node
+            ImGui::DockBuilderSetNodeSize(dockspace_id, {viewport->GetWorkSize().x, viewport->GetWorkSize().y});
+
+            ImGuiID dock_main_id = dockspace_id;
+
+            ImGuiID dock_id_left   = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left,  0.15f, nullptr, &dock_main_id);
+            ImGuiID dock_id_right  = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.20f, nullptr, &dock_main_id);
+            ImGuiID dock_id_bottom = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down,  0.20f, nullptr, &dock_main_id);
+            ImGuiID dock_id_center = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Up,    0.20f, nullptr, &dock_main_id);
+
+            ImGui::DockBuilderDockWindow("Nodes",         dock_id_center); // editor
+            ImGui::DockBuilderDockWindow("Code",          dock_id_bottom); // bottom
+            ImGui::DockBuilderDockWindow("Inspector",     dock_id_left);   // left
+            ImGui::DockBuilderDockWindow("Configuration", dock_id_right);  // right
+            ImGui::DockBuilderFinish(dockspace_id);
+
+            ImGui::DockBuilderFinish(dockspace_id);
+
+            ImGui::EndChild();
+            ImGui::End();
+            dockspaceBuilt = true;
+        }
 
 		if (!initialized)
 		{
