@@ -1,0 +1,2 @@
+input("Name") = Dense(input("Units"))(input("Link"))
+output("qwqw", 12)
