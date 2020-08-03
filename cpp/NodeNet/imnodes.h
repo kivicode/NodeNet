@@ -30,6 +30,7 @@ enum ColorStyle
 enum StyleVar
 {
     StyleVar_GridSpacing = 0,
+    StyleVar_GridSize = 2,
     StyleVar_NodeCornerRounding,
     StyleVar_NodePaddingHorizontal,
     StyleVar_NodePaddingVertical
@@ -101,6 +102,7 @@ struct IO
 struct Style
 {
     float grid_spacing;
+    float grid_size;
 
     float node_corner_rounding;
     float node_padding_horizontal;
@@ -161,6 +163,7 @@ IO& GetIO();
 Style& GetStyle();
 // Style presets matching the dear imgui styles of the same name.
 void StyleColorsDark(); // on by default
+void StyleColorsCustomDark();
 void StyleColorsClassic();
 void StyleColorsLight();
 

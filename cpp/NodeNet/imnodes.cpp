@@ -1125,23 +1125,18 @@ void draw_grid(EditorContext& editor, const ImVec2& canvas_size)
 {
     const ImVec2 offset = editor.panning;
 
-    for (float x = fmodf(offset.x, g.style.grid_spacing); x < canvas_size.x;
-         x += g.style.grid_spacing)
-    {
-        g.canvas_draw_list->AddLine(
-            editor_space_to_screen_space(ImVec2(x, 0.0f)),
-            editor_space_to_screen_space(ImVec2(x, canvas_size.y)),
-            g.style.colors[ColorStyle_GridLine]);
+
+    for (float x = fmodf(offset.x, g.style.grid_spacing); x < canvas_size.x; x += g.style.grid_spacing) {
+        for (float y = fmodf(offset.y, g.style.grid_spacing); y < canvas_size.y; y += g.style.grid_spacing) {
+
+            g.canvas_draw_list->AddCircleFilled(editor_space_to_screen_space(ImVec2(x, y)), g.style.grid_size / 2, g.style.colors[ColorStyle_GridLine]);
+//            g.canvas_draw_list->AddRectFilled(editor_space_to_screen_space(ImVec2(x, y)),
+//                                              editor_space_to_screen_space(
+//                                                      ImVec2(x + g.style.grid_size, y + g.style.grid_size)),
+//                                              g.style.colors[ColorStyle_GridLine]);
+        }
     }
 
-    for (float y = fmodf(offset.y, g.style.grid_spacing); y < canvas_size.y;
-         y += g.style.grid_spacing)
-    {
-        g.canvas_draw_list->AddLine(
-            editor_space_to_screen_space(ImVec2(0.0f, y)),
-            editor_space_to_screen_space(ImVec2(canvas_size.x, y)),
-            g.style.colors[ColorStyle_GridLine]);
-    }
 }
 
 struct QuadOffsets
@@ -1306,6 +1301,7 @@ void draw_node(EditorContext& editor, const int node_idx)
     ImGui::PopID();
 
     const bool item_hovered = ImGui::IsItemHovered();
+    bool item_selected = false;
 
     ImU32 node_background = node.color_style.background;
     ImU32 titlebar_background = node.color_style.titlebar;
@@ -1314,6 +1310,7 @@ void draw_node(EditorContext& editor, const int node_idx)
     {
         node_background = node.color_style.background_selected;
         titlebar_background = node.color_style.titlebar_selected;
+        item_selected = true;
     }
     else if (item_hovered)
     {
@@ -1339,7 +1336,7 @@ void draw_node(EditorContext& editor, const int node_idx)
                 ImDrawCornerFlags_Top);
         }
 
-        if ((g.style.flags & StyleFlags_NodeOutline) != 0)
+        if ((g.style.flags & StyleFlags_NodeOutline) != 0 && item_selected)
         {
             g.canvas_draw_list->AddRect(
                 node.rect.Min,
@@ -1474,7 +1471,7 @@ IO::LinkDetachWithModifierClick::LinkDetachWithModifierClick() : modifier(NULL) 
 IO::IO() : emulate_three_button_mouse(), link_detach_with_modifier_click() {}
 
 Style::Style()
-    : grid_spacing(32.f), node_corner_rounding(4.f), node_padding_horizontal(8.f),
+    : grid_spacing(35.f), grid_size(2.f), node_corner_rounding(4.f), node_padding_horizontal(8.f),
       node_padding_vertical(8.f), link_thickness(3.f), link_line_segments_per_length(0.1f),
       link_hover_distance(10.f), pin_circle_radius(4.f), pin_quad_side_length(7.f),
       pin_triangle_side_length(9.5), pin_line_thickness(1.f), pin_hover_radius(10.f),
@@ -1617,6 +1614,29 @@ void StyleColorsLight()
     g.style.colors[ColorStyle_GridBackground] = IM_COL32(225, 225, 225, 255);
     g.style.colors[ColorStyle_GridLine] = IM_COL32(180, 180, 180, 100);
     g.style.flags = StyleFlags(StyleFlags_None);
+}
+
+void StyleColorsCustomDark() {
+    StyleColorsDark();
+    g.style.colors[ColorStyle_GridBackground]   = IM_COL32(21, 21, 21, 255);
+    g.style.colors[ColorStyle_GridLine]         = IM_COL32(60, 60, 60, 255);
+
+    g.style.colors[ColorStyle_TitleBar]         = IM_COL32(42, 108, 187, 255);
+    g.style.colors[ColorStyle_TitleBarHovered]  = IM_COL32(47, 119, 208, 255);
+    g.style.colors[ColorStyle_TitleBarSelected] = IM_COL32(47, 119, 208, 255);
+
+    g.style.colors[ColorStyle_NodeOutline]      = IM_COL32(213, 212, 255, 255);
+
+    g.style.colors[ColorStyle_Link]             = IM_COL32(231, 201, 68, 255);
+    g.style.colors[ColorStyle_LinkHovered]      = IM_COL32(234, 209, 97, 255);
+    g.style.colors[ColorStyle_LinkSelected]     = IM_COL32(234, 209, 97, 255);
+
+    g.style.colors[ColorStyle_Pin]              = IM_COL32(231, 201, 68, 255);
+    g.style.colors[ColorStyle_PinHovered]       = IM_COL32(231, 201, 68, 255);
+
+    g.style.colors[ColorStyle_NodeBackground]         = IM_COL32(50, 50, 50, 255);
+    g.style.colors[ColorStyle_NodeBackgroundHovered]  = IM_COL32(60, 60, 60, 255);
+    g.style.colors[ColorStyle_NodeBackgroundSelected] = IM_COL32(60, 60, 60, 255);
 }
 
 void BeginNodeEditor()

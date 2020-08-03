@@ -33,7 +33,7 @@ namespace NodeGenerator {
                 std::string pinName = config.inputs[i].name;
                 int pinId = GET_INPUT_ID(node, i);
 
-                imnodes::BeginInputAttribute(pinId);
+                imnodes::BeginInputAttribute(pinId, config.inputs[i].dataType == CODE ? imnodes::PinShape_QuadFilled : imnodes::PinShape_CircleFilled);
                 const float label_width = ImGui::CalcTextSize(pinName.c_str()).x;
                 ImGui::TextUnformatted(pinName.c_str());
 
@@ -78,7 +78,7 @@ namespace NodeGenerator {
                 std::string pinName = config.outputs[i].name;
                 int pinId = GET_OUTPUT_ID(node, i);
 
-                imnodes::BeginOutputAttribute(pinId);
+                imnodes::BeginOutputAttribute(pinId, config.outputs[i].dataType == CODE ? imnodes::PinShape_QuadFilled : imnodes::PinShape_CircleFilled);
                 const float text_width = ImGui::CalcTextSize(pinName.c_str()).x;
                 ImGui::Indent(120.f + ImGui::CalcTextSize(pinName.c_str()).x - text_width);
                 ImGui::TextUnformatted(pinName.c_str());

@@ -200,7 +200,8 @@ void Node::replaceInputsWithValues(Editor& editor) {
 
             if(++n == MAX_INLINE_PIN_DECLARATIONS) break; // infinite while fuse
         }
-        this->processedCode += line + "\n";
+        if (line != "" && line != "\n") this->processedCode += line + "\n"; // avid empty lines
+        else this->processedCode += line;
     }
 }
 
@@ -224,7 +225,8 @@ void Node::deleteOutputsFromCode() {
 
             if(++n == MAX_INLINE_PIN_DECLARATIONS) break; // infinite while fuse
         }
-        tmpCode += line + "\n";
+        if (line != "" && line != "\n") tmpCode += line + "\n";
+        else tmpCode += line;
     }
     this->processedCode = tmpCode;
 }
@@ -252,7 +254,8 @@ std::string Node::generateProcessedCode(Editor& editor) {
     this->replaceInputsWithValues(editor);
     this->deleteOutputsFromCode();
 
-    auto linkSearch = editor.getLinkToPin(editor.nodes.at(this->id-1), 0);
+    std::cout << this->id << std::endl;
+    auto linkSearch = editor.getLinkToPin(editor.nodes.at(this->id == 0 ? 0 : this->id-1), 0);
     if (linkSearch.second) {
         auto nodeSearch = editor.getNodeThatHasPinById(linkSearch.first.start_attr);
         if (nodeSearch.second) {

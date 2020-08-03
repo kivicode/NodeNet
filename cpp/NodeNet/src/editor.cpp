@@ -13,11 +13,19 @@ namespace graphics {
 
     void handleNewLinks();
     void handleNewNodes();
+    void handleDragging();
     void updateLinks();
     void drawNode(Node &node);
     void debug();
 
     Editor editor;
+    MlTrainer trainer;
+
+
+    bool draggingWasStarted = false;
+    ImVec2 posWhenStartedDragging = ImVec2(0, 0);
+    float wheelSpeed = 10;
+    bool invertScrolling= false;
 
     void show_code_inspector() {
         ImGui::Begin("Code");
@@ -43,6 +51,27 @@ namespace graphics {
     void show_configuration_settings() {
         ImGui::Begin("Configuration");
 
+        ImGui::BeginGroupPanel("Dataset settings", ImVec2(-1.0f, 0.0f));
+
+
+        ImGui::InputText("Speed", &wheelSpeed, 0, 50);
+        ImGui::Checkbox("Invert", &invertScrolling);
+
+
+        ImGui::EndGroupPanel();
+
+
+        ImGui::End();
+    }
+
+    void show_settings() {
+        ImGui::Begin("Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+        ImGui::BeginGroupPanel("Scrolling", ImVec2(-1.0f, 0.0f));
+
+        ImGui::SliderFloat("Speed", &wheelSpeed, 0, 50);
+        ImGui::Checkbox("Invert", &invertScrolling);
+
+        ImGui::EndGroupPanel();
         ImGui::End();
     }
 
@@ -62,6 +91,7 @@ namespace graphics {
         imnodes::EndNodeEditor();
 
         graphics::handleNewNodes();
+        graphics::handleDragging();
 
         graphics::handleNewLinks();
         graphics::debug();
@@ -106,6 +136,8 @@ namespace graphics {
     }
 
     void handleNewNodes() {
+
+        if(draggingWasStarted) return;
 
         const bool open_popup = !ImGui::IsAnyItemHovered() &&
                                  ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) &&
@@ -159,6 +191,25 @@ namespace graphics {
         }
     }
 
+    void handleDragging() {
+        const bool nowDragging = ImGui::IsMouseDragging(1, 2);
+
+        if(!draggingWasStarted && nowDragging) {
+            draggingWasStarted = true;
+            posWhenStartedDragging = imnodes::EditorContextGetPanning();
+        } else if(draggingWasStarted && !nowDragging) {
+            draggingWasStarted = false;
+        } else if(draggingWasStarted && nowDragging) {
+            auto mouseDelta = ImGui::GetMouseDragDelta(1);
+            auto editorDelta = ImVec2(posWhenStartedDragging.x + mouseDelta.x, posWhenStartedDragging.y + mouseDelta.y);
+            imnodes::EditorContextResetPanning(editorDelta);
+            // std::cout << "Mouse move: (" << delta.x << ", " << delta.y << ")\n";
+        }
+        auto cur = imnodes::EditorContextGetPanning();
+        float speed = wheelSpeed * (invertScrolling ? -1.f : 1.f);
+        imnodes::EditorContextResetPanning(ImVec2(cur.x - (ImGui::GetIO().MouseWheelH * speed), cur.y + (ImGui::GetIO().MouseWheel * speed)));
+    }
+
     void debug() {
         if (ImGui::IsKeyReleased(SDL_SCANCODE_K)) {
             std::cout << "\n\n";
@@ -177,10 +228,11 @@ namespace graphics {
     }
 
     void NodeEditorShow() {
-        show_editor("Nodes", editor);
         show_code_inspector();
         show_node_inspector();
+        show_settings();
         show_configuration_settings();
+        show_editor("Nodes", editor);
     }
 
     void NodeEditorShutdown() {
