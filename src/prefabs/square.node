@@ -1,4 +1,0 @@
-setTitle('Square')
-val = input('value', 0, 'const')
-val = val ** 2
-output('output', val)
