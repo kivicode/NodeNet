@@ -1,0 +1,82 @@
+cmake_minimum_required(VERSION 3.16)
+project(NodeNet)
+
+set(CMAKE_CXX_STANDARD 17)
+
+include_directories(.)
+include_directories(bin)
+include_directories(build)
+include_directories(dependencies)
+include_directories(dependencies/gl3w)
+include_directories(dependencies/gl3w/include)
+include_directories(dependencies/gl3w/include/GL)
+include_directories(dependencies/gl3w/src)
+include_directories(dependencies/imgui-1.76)
+include_directories(fonts)
+include_directories(lib)
+include_directories(src)
+
+add_executable(NodeNet
+        bin/Debug/node
+        build/gmake/obj/Debug/gl3w/gl3w.d
+        build/gmake/obj/Debug/gl3w/gl3w.o
+        build/gmake/obj/Debug/imgui/imgui.d
+        build/gmake/obj/Debug/imgui/imgui.o
+        build/gmake/obj/Debug/imgui/imgui_demo.d
+        build/gmake/obj/Debug/imgui/imgui_demo.o
+        build/gmake/obj/Debug/imgui/imgui_draw.d
+        build/gmake/obj/Debug/imgui/imgui_draw.o
+        build/gmake/obj/Debug/imgui/imgui_impl_opengl3.d
+        build/gmake/obj/Debug/imgui/imgui_impl_opengl3.o
+        build/gmake/obj/Debug/imgui/imgui_impl_sdl.d
+        build/gmake/obj/Debug/imgui/imgui_impl_sdl.o
+        build/gmake/obj/Debug/imgui/imgui_widgets.d
+        build/gmake/obj/Debug/imgui/imgui_widgets.o
+        build/gmake/obj/Debug/imnodes/imnodes.d
+        build/gmake/obj/Debug/imnodes/imnodes.o
+        build/gmake/obj/Debug/node/main.d
+        build/gmake/obj/Debug/node/main.o
+        build/gmake/gl3w.make
+        build/gmake/imgui.make
+        build/gmake/imnodes.make
+        build/gmake/node.make
+        dependencies/gl3w/include/GL/gl3w.h
+        dependencies/gl3w/include/GL/glcorearb.h
+        dependencies/gl3w/src/gl3w.c
+        dependencies/imgui-1.76/imconfig.h
+        dependencies/imgui-1.76/imgui.cpp
+        dependencies/imgui-1.76/imgui.h
+        dependencies/imgui-1.76/imgui_demo.cpp
+        dependencies/imgui-1.76/imgui_draw.cpp
+        dependencies/imgui-1.76/imgui_impl_opengl3.cpp
+        dependencies/imgui-1.76/imgui_impl_opengl3.h
+        dependencies/imgui-1.76/imgui_impl_sdl.cpp
+        dependencies/imgui-1.76/imgui_impl_sdl.h
+        dependencies/imgui-1.76/imgui_internal.h
+        dependencies/imgui-1.76/imgui_widgets.cpp
+        dependencies/imgui-1.76/imstb_rectpack.h
+        dependencies/imgui-1.76/imstb_textedit.h
+        dependencies/imgui-1.76/imstb_truetype.h
+        fonts/Roboto/LICENSE.txt
+        fonts/Roboto/Roboto-Black.ttf
+        fonts/Roboto/Roboto-BlackItalic.ttf
+        fonts/Roboto/Roboto-Bold.ttf
+        fonts/Roboto/Roboto-BoldItalic.ttf
+        fonts/Roboto/Roboto-Italic.ttf
+        fonts/Roboto/Roboto-Light.ttf
+        fonts/Roboto/Roboto-LightItalic.ttf
+        fonts/Roboto/Roboto-Medium.ttf
+        fonts/Roboto/Roboto-MediumItalic.ttf
+        fonts/Roboto/Roboto-Regular.ttf
+        fonts/Roboto/Roboto-Thin.ttf
+        fonts/Roboto/Roboto-ThinItalic.ttf
+        lib/Debug/libgl3w.a
+        lib/Debug/libimgui.a
+        lib/Debug/libimnodes.a
+        src/main.cpp
+        src/editor.h
+        src/editor.cpp
+        imgui.ini
+        imnodes.cpp
+        imnodes.h
+        Makefile src/data_types.cpp src/generator.cpp src/settings.h src/utils.cpp src/executor.h src/templates.h src/generator.h src/utils.h src/data_types.h src/executor.cpp dependencies/imgui-1.76/trainer.cpp dependencies/imgui-1.76/trainer.h)
