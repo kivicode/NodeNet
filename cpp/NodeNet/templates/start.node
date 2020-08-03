@@ -1,0 +1,1 @@
+input("Name") = Input(shape=(input("Size"),))
