@@ -1,1 +1,0 @@
-input("Name") = Model(inputs={{INPUT_NAME}}, outputs=input("Link"))
