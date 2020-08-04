@@ -3,3 +3,5 @@
 //
 
 #include "trainer.h"
+
+#pragma once

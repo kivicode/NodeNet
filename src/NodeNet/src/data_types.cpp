@@ -86,7 +86,7 @@ int Node::inputIdByName(std::string& name) {
 
 std::any Node::getInputValueById(Editor &editor, int index) {
     if (this->config.inputs[index].name == LINK_PIN_TEXT) {
-        auto val = this->getPrevVarname(editor, editor.getLinkToPin(editor.nodes.at(this->id - 1), index));
+        auto val = this->getPrevVarname(editor, editor.getLinkToPin(editor.nodes.at(this->id == 0 ? 0 : this->id - 1), index));
 #ifdef DEBUG
         std::cout << "Found staff pin: " << this->config.inputs[index].name << " With val: " << val << " ID: " << this->inputIds[index] << "\n";
 #endif
@@ -254,7 +254,6 @@ std::string Node::generateProcessedCode(Editor& editor) {
     this->replaceInputsWithValues(editor);
     this->deleteOutputsFromCode();
 
-    std::cout << this->id << std::endl;
     auto linkSearch = editor.getLinkToPin(editor.nodes.at(this->id == 0 ? 0 : this->id-1), 0);
     if (linkSearch.second) {
         auto nodeSearch = editor.getNodeThatHasPinById(linkSearch.first.start_attr);

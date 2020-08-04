@@ -14,7 +14,7 @@ NodeConfig test_config = NodeConfig("Dense", testInputs, testOutputs);
 std::vector<NodeIOPin> finish_inputs =  {};
 NodeConfig finish_config = NodeConfig("Finish", finish_inputs, std::vector<NodeIOPin>{});
 
-std::vector<NodeIOPin> start_inputs =  {NodeIOPin("Name", true, STRING), NodeIOPin("Size", true, INTEGER)};
+std::vector<NodeIOPin> start_inputs =  {NodeIOPin("Name", true, STRING), NodeIOPin("Size", true, INTEGER, 1, 1000, 1)};
 std::vector<NodeIOPin> start_outputs = {NodeIOPin("", false, CODE)};
 NodeConfig start_config = NodeConfig("Input", start_inputs, start_outputs);
 

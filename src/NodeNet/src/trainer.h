@@ -5,4 +5,8 @@
 #ifndef NODENET_TRAINER_H
 #define NODENET_TRAINER_H
 
+class MlTrainer {
+
+};
+
 #endif //NODENET_TRAINER_H

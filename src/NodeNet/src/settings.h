@@ -13,6 +13,8 @@
 #define NAME_PIN_TEXT "Name"
 #define LINK_PIN_TEXT "Link"
 
+#define MAX_DATASET_PATH_LENGTH 1024
+
 #define DEBUG
 
 #endif

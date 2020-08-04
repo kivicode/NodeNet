@@ -1,10 +1,13 @@
 #include "editor.h"
 #include "generator.cpp"
 #include "executor.h"
+#include "dataset_manager.h"
+#include "trainer.h"
+#include "code_manager.h"
+#include "logger.h"
 
 #include <imnodes.h>
 #include <imgui.h>
-#include <SDL2/SDL_scancode.h>
 
 #include <algorithm>
 #include <dependencies/imgui-1.76/imgui_internal.h>
@@ -18,8 +21,14 @@ namespace graphics {
     void drawNode(Node &node);
     void debug();
 
+    std::string consoleLogString;
+    char consoleInputBuff[1024] = {0};
+
     Editor editor;
     MlTrainer trainer;
+    DatasetManager dataset;
+    CodeManager codeManager;
+    Logger console(&consoleLogString);
 
 
     bool draggingWasStarted = false;
@@ -30,6 +39,13 @@ namespace graphics {
     void show_code_inspector() {
         ImGui::Begin("Code");
 
+        ImGui::End();
+    }
+
+    void show_log() {
+        ImGui::Begin("Log");
+        ImGui::TextUnformatted(consoleLogString.c_str());
+        ImGui::InputTextWithHint("##hidelabel", "Enter a command", consoleInputBuff, 1024);
         ImGui::End();
     }
 
@@ -51,14 +67,23 @@ namespace graphics {
     void show_configuration_settings() {
         ImGui::Begin("Configuration");
 
-        ImGui::BeginGroupPanel("Dataset settings", ImVec2(-1.0f, 0.0f));
+//        ImGui::BeginGroupPanel("Dataset settings", ImVec2(-1.0f, 0.0f));
 
 
-        ImGui::InputText("Speed", &wheelSpeed, 0, 50);
-        ImGui::Checkbox("Invert", &invertScrolling);
+        if (ImGui::CollapsingHeader("Dataset")) {
+
+        }
+
+        if (ImGui::CollapsingHeader("Trainer")) {
+
+        }
+
+        if (ImGui::CollapsingHeader("Generator")) {
+
+        }
 
 
-        ImGui::EndGroupPanel();
+//        ImGui::EndGroupPanel();
 
 
         ImGui::End();
@@ -75,16 +100,22 @@ namespace graphics {
         ImGui::End();
     }
 
-    void show_editor(const char *editor_name, Editor &editor) {
-        imnodes::EditorContextSet(editor.context);
+    void generateCode();
+
+    void show_editor(const char *editor_name, Editor& _editor) {
+        imnodes::EditorContextSet(_editor.context);
 
         ImGui::Begin(editor_name);
+
+        if (ImGui::Button("Generate code")) {
+            generateCode();
+        }
 
         imnodes::BeginNodeEditor();
 
         graphics::updateLinks();
 
-        for (Node &node : editor.nodes) {
+        for (Node &node : _editor.nodes) {
             graphics::drawNode(node);
         } // update/redraw nodes
 
@@ -97,6 +128,12 @@ namespace graphics {
         graphics::debug();
 
         ImGui::End();
+    }
+
+
+    void generateCode() {
+        codeManager.generateCode(editor);
+        console.log("Code generated:\n" + codeManager.getCode());
     }
 
     void drawNode(Node &node) {
@@ -156,7 +193,7 @@ namespace graphics {
                 editor.nodes.push_back(node);
                 editor.inputNodeIds.push_back(node.id);
                 NodeGenerator::buildStartNode(editor.nodes[editor.nodes.size() - 1],
-                                            "/Users/kivicode/Documents/GitHub/NodeNet/cpp/NodeNet/templates/start.node");
+                                            "/Users/kivicode/Documents/GitHub/NodeNet/src/NodeNet/templates/start.node");
 #ifdef DEBUG
                 std::cout << "Create node: " << node_id << "\n";
 #endif
@@ -168,7 +205,7 @@ namespace graphics {
                 Node node = Node(node_id, 0.f);
                 editor.nodes.push_back(node);
                 NodeGenerator::buildTestNode(editor.nodes[editor.nodes.size() - 1],
-                                             "/Users/kivicode/Documents/GitHub/NodeNet/cpp/NodeNet/templates/test.node");
+                                             "/Users/kivicode/Documents/GitHub/NodeNet/src/NodeNet/templates/test.node");
 
 #ifdef DEBUG
                 std::cout << "Create node: " << node_id << "\n";
@@ -182,7 +219,7 @@ namespace graphics {
                 editor.nodes.push_back(node);
                 editor.finishNodeIds.push_back(node.id - 1);
                 NodeGenerator::buildFinishNode(editor.nodes[editor.nodes.size() - 1],
-                                               "/Users/kivicode/Documents/GitHub/NodeNet/cpp/NodeNet/templates/finish.node");
+                                               "/Users/kivicode/Documents/GitHub/NodeNet/src/NodeNet/templates/finish.node");
 #ifdef DEBUG
                 std::cout << "Create node: " << node_id << "\n";
 #endif
@@ -211,12 +248,7 @@ namespace graphics {
     }
 
     void debug() {
-        if (ImGui::IsKeyReleased(SDL_SCANCODE_K)) {
-            std::cout << "\n\n";
-            int i = editor.finishNodeIds[0];
-            std::string finalCode = editor.nodes[i].generateProcessedCode(editor);
-            std::cout << "\n\nCode:\"\n" << finalCode << "\"\n";
-        }
+
     }
 
     void NodeEditorInitialize() {
@@ -232,6 +264,7 @@ namespace graphics {
         show_node_inspector();
         show_settings();
         show_configuration_settings();
+        show_log();
         show_editor("Nodes", editor);
     }
 
