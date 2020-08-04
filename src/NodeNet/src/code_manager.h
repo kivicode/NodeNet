@@ -21,9 +21,9 @@ public:
     void generateCode(Editor& editor){
         this->code = "";
         for (int i : editor.finishNodeIds) {
-            auto code = editor.nodes[i].generateProcessedCode(editor);
+            auto _code = editor.nodes[i].generateProcessedCode(editor);
             std::cout << editor.nodes[i].config.title;
-            this->code += code;
+            this->code += _code;
             this->code += "\n\n";
         }
     }

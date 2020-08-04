@@ -229,6 +229,7 @@ namespace graphics {
     }
 
     void handleDragging() {
+        if (!imnodes::IsEditorHovered()) return;
         const bool nowDragging = ImGui::IsMouseDragging(1, 2);
 
         if(!draggingWasStarted && nowDragging) {
@@ -248,7 +249,7 @@ namespace graphics {
     }
 
     void debug() {
-
+//        std::cout << imnodes::IsEditorHovered() << "\n";
     }
 
     void NodeEditorInitialize() {
