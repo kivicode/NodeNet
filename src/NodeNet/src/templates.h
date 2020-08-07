@@ -7,8 +7,9 @@
 
 #include "data_types.cpp"
 
-std::vector<NodeIOPin> testInputs =  {NodeIOPin("Units", true, INTEGER, 0, 1000, 1)};
-std::vector<NodeIOPin> testOutputs = {NodeIOPin("output", false, CODE)};
+std::vector<NodeIOPin> testInputs =  {NodeIOPin("Units",      true, INTEGER, 0, 1000, 1),
+                                      NodeIOPin("Activation", true, STRING_SELECTOR, {"relu", "softmax"})};
+std::vector<NodeIOPin> testOutputs = {NodeIOPin("output",     false, CODE)};
 NodeConfig test_config = NodeConfig("Dense", testInputs, testOutputs);
 
 std::vector<NodeIOPin> finish_inputs =  {};

@@ -31,6 +31,12 @@ std::pair<bool, int > findInVector(const std::vector<T>& vecOfElements, const T 
 
 std::string printPinLocation(PinLocation pinLocation);
 
+std::string generateIndentation(int indentation) {
+    std::string indentation_string;
+    for(int i = 0; i < indentation; i++) indentation_string.append("\t");
+    return indentation_string;
+}
+
 std::string readFile(const std::string& path);
 
 

@@ -1,2 +1,2 @@
-input("Name") = Dense(input("Units"))(input("Link"))
+input("Name") = Dense(input("Units"), activation="input("Activation")")(input("Link"))
 output("qwqw", 12)

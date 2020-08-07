@@ -12,6 +12,7 @@
 #include <imnodes.h>
 #include <map>
 #include <any>
+#include <string>
 
 
 class Node;
@@ -23,6 +24,7 @@ enum SliderDataType : int {
     INTEGER,
     FLOAT,
     STRING,
+    STRING_SELECTOR,
     CODE
 };
 
@@ -42,12 +44,16 @@ public:
     float minSliderVal = 0;
     float maxSliderVal = 1;
     float sliderSpeed = .1;
+    std::vector<std::string> options;
+    int selectedOption = 0;
 
     bool isStaff = false;
 
     NodeIOPin(std::string name, bool isEditable);
 
     NodeIOPin(std::string name, bool isEditable, SliderDataType dataType);
+
+    NodeIOPin(std::string name, bool isEditable, SliderDataType dataType, std::vector<std::string> options);
 
     NodeIOPin(std::string name, bool isEditable, float minSliderVal, float maxSliderVal, float sliderSpeed);
 
@@ -82,6 +88,12 @@ struct IOData {
         this->f = 0;
         this->i = 0;
     }
+
+    void setString(std::string str) {
+        std::cout << "STR:: " << str << "\n";
+        strcpy(this->s, str.c_str());
+        std::cout << "C_STR:: " << this->s << "\n";
+    }
 };
 
 
@@ -114,15 +126,15 @@ public:
 
     void setBaseCode(std::string code);
     void setConfig(NodeConfig newConfig);
-    std::string generateProcessedCode(Editor& editor);
+    std::string generateProcessedCode(Editor &editor, int indentation);
     void init();
     NodeException checkExceptions(Editor &editor);
 
+    int inputIdByName(std::string& name);
+    std::any getInputValueById(Editor &editor, int localIndex);
 private:
 
     std::string getInputName(Editor &editor);
-    int inputIdByName(std::string& name);
-    std::any getInputValueById(Editor &editor, int index);
     void setProcessedCode(std::string code);
     void replaceInputsWithValues(Editor &editor);
     void deleteOutputsFromCode();

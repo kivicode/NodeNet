@@ -21,6 +21,7 @@
 /* ========== NODE IO PIN ========== */
 NodeIOPin::NodeIOPin(std::string name, bool isEditable)                                                                                     : name(std::move(name)), isEditable(isEditable) {}
 NodeIOPin::NodeIOPin(std::string name, bool isEditable, SliderDataType dataType)                                                            : name(std::move(name)), isEditable(isEditable), dataType(dataType) {}
+NodeIOPin::NodeIOPin(std::string name, bool isEditable, SliderDataType dataType, std::vector<std::string> options)                          : name(std::move(name)), isEditable(isEditable), dataType(dataType), options(std::move(options)) {}
 NodeIOPin::NodeIOPin(std::string name, bool isEditable, SliderDataType dataType, float minSliderVal, float maxSliderVal, float sliderSpeed) : name(std::move(name)), isEditable(isEditable), dataType(dataType), minSliderVal(minSliderVal), maxSliderVal(maxSliderVal), sliderSpeed(sliderSpeed) {}
 NodeIOPin::NodeIOPin(std::string name, bool isEditable, float minSliderVal, float maxSliderVal, float sliderSpeed)                          : name(std::move(name)), isEditable(isEditable), minSliderVal(minSliderVal), maxSliderVal(maxSliderVal), sliderSpeed(sliderSpeed) {}
 
@@ -50,6 +51,10 @@ void Node::init() {
         if (!hasVal) {
             this->inputs[pinId].empty();
             this->inputIds.push_back(pinId);
+            if(config.inputs[ii].dataType == STRING_SELECTOR) {
+                this->config.inputs[ii].selectedOption = 0;
+                this->inputs[pinId].setString(this->config.inputs[ii].options[0]);
+            }
 #ifdef DEBUG
             std::cout << "Create input for node: " << config.title.c_str() << "  Input name: " << config.inputs[ii].name << " id: " << pinId << "\n";
 #endif
@@ -86,11 +91,11 @@ int Node::inputIdByName(std::string& name) {
     return -1;
 }
 
-std::any Node::getInputValueById(Editor &editor, int index) {
-    if (this->config.inputs[index].name == LINK_PIN_TEXT) {
-        auto val = this->getPrevVarname(editor, editor.getLinkToPin(editor.nodes.at(this->id == 0 ? 0 : this->id - 1), index));
+std::any Node::getInputValueById(Editor &editor, int localIndex) {
+    if (this->config.inputs[localIndex].name == LINK_PIN_TEXT) {
+        auto val = this->getPrevVarname(editor, editor.getLinkToPin(editor.nodes.at(this->id - 1), localIndex));
 #ifdef DEBUG
-        std::cout << "Found staff pin: " << this->config.inputs[index].name << " With val: " << val << " ID: " << this->inputIds[index] << "\n";
+        std::cout << "Found staff pin: " << this->config.inputs[localIndex].name << " With val: " << val << " ID: " << this->inputIds[localIndex] << "\n";
 #endif
 
         // convert to char array
@@ -99,20 +104,23 @@ std::any Node::getInputValueById(Editor &editor, int index) {
         charVal[sizeof(charVal) - 1] = 0;
         return charVal;
     }
-    auto pinType = this->config.inputs[index].dataType;
-    index = this->inputIds[index];
+    auto pinType = this->config.inputs[localIndex].dataType;
+    localIndex = this->inputIds[localIndex];
 
     switch(pinType) {
 
         case INTEGER: {
-            return this->inputs[index].i;
+            return this->inputs[localIndex].i;
         }
 
         case FLOAT: {
-            return this->inputs[index].f;
+            return this->inputs[localIndex].f;
         }
         case STRING: {
-            return this->inputs[index].s;
+            return this->inputs[localIndex].s;
+        }
+        case STRING_SELECTOR: {
+            return this->inputs[localIndex].s;
         }
 
         default:
@@ -286,18 +294,22 @@ NodeException Node::checkExceptions(Editor &editor) {
     return NodeException(-1, ""); // placeholder
 }
 
-std::string Node::generateProcessedCode(Editor& editor) {
+std::string Node::generateProcessedCode(Editor &editor, int indentation) {
     NodeException exc = this->checkExceptions(editor);
     if (exc.nodeId != -1) throw exc; // check for 'placeholder' meanless exception
 
     this->replaceInputsWithValues(editor);
     this->deleteOutputsFromCode();
 
-    auto linkSearch = editor.getLinkToPin(editor.nodes.at(this->id == 0 ? 0 : this->id-1), 0);
+    std::string indentation_string = std::move(generateIndentation(indentation));
+
+    if (this->_type == START) this->processedCode.insert(0, indentation_string);
+
+    auto linkSearch = editor.getLinkToPin(editor.nodes.at(this->id-1), 0);
     if (linkSearch.second) {
         auto nodeSearch = editor.getNodeThatHasPinById(linkSearch.first.start_attr);
         if (nodeSearch.second) {
-            this->processedCode.insert(0, nodeSearch.first.generateProcessedCode(editor) + "\n");
+            this->processedCode.insert(0, nodeSearch.first.generateProcessedCode(editor, indentation) + indentation_string);
         }
     }
 

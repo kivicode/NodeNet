@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <dependencies/imgui-1.76/imgui_internal.h>
+#include <future>
 
 namespace graphics {
 
@@ -23,13 +24,16 @@ namespace graphics {
     void debug();
 
     std::string consoleLogString;
+    std::string consoleCodeString;
     char consoleInputBuff[1024] = {0};
 
     Editor editor;
-    MlTrainer trainer;
+    Logger console(&consoleLogString);
+    Logger codeConsole(&consoleCodeString);
+
+    MlTrainer trainer(&codeConsole);
     DatasetManager dataset;
     CodeManager codeManager;
-    Logger console(&consoleLogString);
 
 
     bool draggingWasStarted = false;
@@ -39,14 +43,14 @@ namespace graphics {
 
     void show_code_inspector() {
         ImGui::Begin("Code");
-
+        trainer.exec_step();
+        codeConsole.draw();
         ImGui::End();
     }
 
     void show_log() {
         ImGui::Begin("Log");
-        ImGui::TextUnformatted(consoleLogString.c_str());
-        ImGui::InputTextWithHint("##hidelabel", "Enter a command", consoleInputBuff, 1024);
+        console.draw();
         ImGui::End();
     }
 
@@ -55,9 +59,7 @@ namespace graphics {
 
         ImGui::BeginChild("OuterRegion");
         for (int i = 0; i < 40; ++i) {
-            ImGui::BeginChild(std::to_string(i).c_str());
             ImGui::Text("Entry %i", i);
-            ImGui::EndChild();
         }
         ImGui::EndChild();
 
@@ -79,25 +81,13 @@ namespace graphics {
 
         }
 
-        if (ImGui::CollapsingHeader("Generator")) {
-
-        }
-
-        ImGui::End();
-    }
-
-    void show_settings() {
-        ImGui::Begin("Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-
-        if(ImGui::CollapsingHeader("Saving", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (ImGui::CollapsingHeader("Generator", ImGuiTreeNodeFlags_DefaultOpen)) {
             ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.5f);
 
-            ImGui::InputTextWithHint("", "Save path", codeManager.fileSavePath, 1024);
-
-            ImGui::SameLine();
+            ImGui::InputText( "Save path", codeManager.fileSavePath, 1024);
 
             if(ImGui::Button("Select path")) {
-                auto _path = tinyfd_selectFolderDialog("Add a dataset path", "");
+                auto _path = tinyfd_saveFileDialog("File save path", "", 0, nullptr, "");
                 if(!_path) return;
                 strncpy(codeManager.fileSavePath, _path, 1024);
                 std::string path = codeManager.fileSavePath;
@@ -109,7 +99,18 @@ namespace graphics {
         ImGui::End();
     }
 
+    void show_settings() {
+        ImGui::Begin("Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+
+        if(ImGui::CollapsingHeader("Saving", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+        }
+
+        ImGui::End();
+    }
+
     void generateCode();
+    void train();
 
     void show_editor(const char *editor_name, Editor& _editor) {
         imnodes::EditorContextSet(_editor.context);
@@ -118,7 +119,12 @@ namespace graphics {
 
         if (ImGui::Button("Generate code")) generateCode();
         ImGui::SameLine();
+        if (ImGui::Button("Train")) train();
+        ImGui::SameLine();
         if (ImGui::Button("DEBUG")) debug();
+        ImGui::SameLine();
+        float test = 0;
+        ImGui::InputFloat("abc", &test);
 
         imnodes::BeginNodeEditor();
 
@@ -140,12 +146,25 @@ namespace graphics {
 
     void generateCode() {
         try {
+            codeManager.imports.clear();
+            codeManager.addLib("from keras.models import Model");
+            codeManager.addLib("from keras.layers import *");
             codeManager.generateCode(editor);
+            codeManager.save();
         } catch (NodeException& exception) {
-            console.log("Unnamed node: " + exception.nodeTitle, LogLevel::ERR);
+            console.log("Unnamed node: " + editor.nodes[exception.nodeId-1].config.title, LogLevel::ERR);
             return;
         }
-        console.log("Code generated:\n" + codeManager.getCode());
+//        console.log("Code generated:\n" + codeManager.getCode());
+    }
+
+    void train() {
+        if (std::string(codeManager.fileSavePath).empty()) {
+            console.log("Empty file save path", ERR);
+            return;
+        }
+        codeManager.save();
+        trainer.train(codeManager.fileSavePath);
     }
 
     void drawNode(Node &node) {
@@ -261,15 +280,7 @@ namespace graphics {
     }
 
     void debug() {
-//        char const * lTheSaveFileName;
-//        char const * lTheOpenFileName;
-//        char const * lTheSelectFolderName;
-//        FILE * lIn;
-//        char lBuffer[1024];
-        auto _path = tinyfd_selectFolderDialog("Add a dataset path", "");
-        if(!_path) return;
-        std::string path = _path;
-        console.log("Path: " + path);
+        trainer.start_exec("tree /");
     }
 
     void NodeEditorInitialize() {

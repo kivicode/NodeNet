@@ -49,21 +49,41 @@ namespace NodeGenerator {
 
                     switch(config.inputs[i].dataType) {
                         case SliderDataType::FLOAT:
-                            ImGui::DragFloat("##hidelabel", &node.inputs[pinId].f,
-                                                                  config.inputs[i].sliderSpeed,
-                                                                  config.inputs[i].minSliderVal,
-                                                                  config.inputs[i].maxSliderVal);
+                            ImGui::InputFloat("##hidelabel", &node.inputs[pinId].f, 0, 0);
+//                            ImGui::DragFloat("##hidelabel", &node.inputs[pinId].f,
+//                                                                  config.inputs[i].sliderSpeed,
+//                                                                  config.inputs[i].minSliderVal,
+//                                                                  config.inputs[i].maxSliderVal);
                             break;
 
                         case SliderDataType::INTEGER:
-                            ImGui::DragInt("##hidelabel", &node.inputs[pinId].i,
-                                           config.inputs[i].sliderSpeed,
-                                           (int)config.inputs[i].minSliderVal,
-                                           (int)config.inputs[i].maxSliderVal);
+                            ImGui::InputInt("##hidelabel", &node.inputs[pinId].i, 0, 0);
+
+                            node.inputs[pinId].i = std::max(node.inputs[pinId].i, 0);
+
+//                            ImGui::DragInt("##hidelabel", &node.inputs[pinId].i,
+//                                           config.inputs[i].sliderSpeed,
+//                                           (int)config.inputs[i].minSliderVal,
+//                                           (int)config.inputs[i].maxSliderVal);
                             break;
 
                         case SliderDataType::STRING:
                             ImGui::InputText("##hidelabel", node.inputs[pinId].s, INPUT_BUFF_SIZE);
+                            break;
+
+                        case SliderDataType::STRING_SELECTOR:
+                            ImGui::PushItemWidth(100);
+                            if (ImGui::BeginCombo("##hidelabel", node.config.inputs[i].options.at(node.config.inputs[i].selectedOption).c_str())) {
+                                for (int j = 0; j < node.config.inputs[i].options.size(); j++) {
+                                    if (ImGui::Selectable(node.config.inputs[i].options.at(j).c_str(),
+                                                          j == node.config.inputs[i].selectedOption)) {
+                                        node.config.inputs[i].selectedOption = j;
+                                        node.inputs[pinId].setString(node.config.inputs[i].options[j]);
+                                    }
+                                }
+                                ImGui::EndCombo();
+                            }
+                            ImGui::PopItemWidth();
                             break;
 
                         default:

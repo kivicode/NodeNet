@@ -5,25 +5,35 @@
 #ifndef NODENET_LOGGER_H
 #define NODENET_LOGGER_H
 
+
 #include <string>
 #include <utility>
+#include <imgui.h>
 
 using namespace std;
 
 enum LogLevel {
     INFO,
     WARN,
-    ERR
+    ERR,
+    NONE
 };
 
 class Logger {
 public:
     string* target;
 
-    Logger(string* target) : target(target) {}
+    explicit Logger(string* target) : target(target) {}
+
+    void draw() {
+        ImGui::TextUnformatted(this->target->c_str());
+        if (ScrollToBottom) ImGui::SetScrollHereY(1.f);
+        ScrollToBottom = false;
+    }
 
     void log(const string& msg, LogLevel level) {
-        this->target->append(this->getPrefix(level) + msg + "\n");
+        ScrollToBottom = true;
+        this->target->append(getPrefix(level) + msg + (level == NONE ? "" : "\n"));
     }
 
     void log(const string& msg) {
@@ -31,8 +41,9 @@ public:
     }
 
 private:
+    bool ScrollToBottom = true;
 
-    string getPrefix(LogLevel level) {
+    static string getPrefix(LogLevel level) {
         switch (level) {
 
             case INFO:
@@ -43,8 +54,10 @@ private:
 
             case ERR:
                 return "[ERROR ] ";
+
+            case NONE:
+                return "";
         }
     }
 };
-
 #endif //NODENET_LOGGER_H
