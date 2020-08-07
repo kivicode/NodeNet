@@ -27,6 +27,7 @@
 #include <string.h> // strlen, strncmp
 #include <stdio.h>  // for fwrite, ssprintf, sscanf
 #include <stdlib.h>
+#include <string>
 
 namespace imnodes
 {
@@ -171,14 +172,15 @@ struct NodeData
     ImRect title_bar_content_rect;
     ImRect rect;
 
-    struct
-    {
+    NodeMarks mark = NodeMarks::None;
+    std::string markDescription = "";
+
+    struct {
         ImU32 background, background_hovered, background_selected, outline, titlebar,
             titlebar_hovered, titlebar_selected;
     } color_style;
 
-    struct
-    {
+    struct {
         float corner_rounding;
         ImVec2 padding;
     } layout_style;
@@ -1320,6 +1322,40 @@ void draw_node(EditorContext& editor, const int node_idx)
 
     {
         // node base
+        if(node.mark != NodeMarks::None) {
+
+            float borderThickness = 3;
+            ImVec2 ul = node.rect.Min - ImVec2(borderThickness, borderThickness);
+            ImVec2 dr = node.rect.Max + ImVec2(borderThickness, borderThickness);
+
+            auto color = NodeMarkColors.Red;
+            if (node.mark == NodeMarks::Orange) {
+                color = NodeMarkColors.Orange;
+            }
+
+            if (item_hovered) {
+                float fontSize = 24;
+                float thickness = 3;
+
+                ImRect titleBbox = get_node_title_rect(node);
+                ImVec2 textPos = ImVec2(titleBbox.Max.x, titleBbox.Min.y) + ImVec2(18, -37);
+                ImVec2 text_size = ImGui::GetFont()->CalcTextSizeA(fontSize, FLT_MAX, false,
+                                                                   node.markDescription.c_str());
+
+                auto lineStart = ImVec2(titleBbox.Max.x, titleBbox.Min.y);
+                auto lineMid = textPos + ImVec2(0, fontSize + thickness / 2);
+                auto lineEnd = textPos + ImVec2(text_size.x, fontSize + thickness / 2);
+
+                g.canvas_draw_list->AddText(nullptr, fontSize, textPos, color, node.markDescription.c_str());
+
+                g.canvas_draw_list->AddLine(lineStart, lineMid, color, thickness);
+                g.canvas_draw_list->AddLine(lineMid, lineEnd, color, thickness);
+            }
+
+
+            g.canvas_draw_list->AddRectFilled(ul, dr, color, node.layout_style.corner_rounding);
+        }
+
         g.canvas_draw_list->AddRectFilled(
             node.rect.Min, node.rect.Max, node_background, node.layout_style.corner_rounding);
 
@@ -1774,6 +1810,15 @@ void BeginNode(const int node_id)
     ImGui::PushID(node.id);
     ImGui::BeginGroup();
 }
+
+void MarkNode(const int node_id, NodeMarks mark, std::string description) {
+    EditorContext& editor = editor_context_get();
+    const int node_idx = editor.nodes.find_or_create_index_for(node_id);
+
+    editor.nodes.pool[node_idx].mark = mark;
+    editor.nodes.pool[node_idx].markDescription = description;
+}
+
 
 void EndNode()
 {

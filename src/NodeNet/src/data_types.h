@@ -6,6 +6,7 @@
 #define NODENET_DATA_TYPES_H
 
 #include "utils.cpp"
+#include "exceptions.h"
 #include <array>
 #include <vector>
 #include <imnodes.h>
@@ -96,6 +97,9 @@ public:
 
     PrivatePinType _type = PrivatePinType::CUSTOM;
 
+    imnodes::NodeMarks mark = imnodes::NodeMarks::None;
+    std::string markDescription = "";
+
     std::vector<int>  inputIds = {};
     std::vector<int> outputIds = {};
 
@@ -112,6 +116,7 @@ public:
     void setConfig(NodeConfig newConfig);
     std::string generateProcessedCode(Editor& editor);
     void init();
+    NodeException checkExceptions(Editor &editor);
 
 private:
 
@@ -122,6 +127,8 @@ private:
     void replaceInputsWithValues(Editor &editor);
     void deleteOutputsFromCode();
     static std::string getPrevVarname(Editor &editor, std::pair<Link, bool> link);
+    bool hasName(Editor &editor);
+    bool hasLink(Editor &editor);
 };
 
 class Link {

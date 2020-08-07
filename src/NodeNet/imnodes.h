@@ -1,6 +1,8 @@
 #pragma once
 
 #include <stddef.h>
+#include <string>
+#include "dependencies/imgui-1.76/imgui.h"
 
 struct ImVec2;
 
@@ -69,6 +71,17 @@ enum AttributeFlags
     // IsLinkDestroyed() after EndNodeEditor().
     AttributeFlags_EnableLinkCreationOnSnap = 1 << 1
 };
+
+enum NodeMarks {
+    None,
+    Red,
+    Orange
+};
+
+struct {
+    ImU32 Red    = IM_COL32(194, 24,  7, 255);
+    ImU32 Orange = IM_COL32(255, 103, 0, 255);
+} NodeMarkColors;
 
 struct IO
 {
@@ -179,6 +192,7 @@ void PushStyleVar(StyleVar style_item, float value);
 void PopStyleVar();
 
 void BeginNode(int id);
+void MarkNode(int id, NodeMarks mark, std::string description);
 void EndNode();
 
 // Place your node title bar content (such as the node title, using ImGui::Text) between the

@@ -13,6 +13,8 @@
 
 #include "utils.h"
 #include <any>
+#include "exceptions.h"
+
 
 
 namespace NodeGenerator {
@@ -22,6 +24,9 @@ namespace NodeGenerator {
     void generateFromConfig(Editor& editor, Node& node, NodeConfig& config) {
 
         imnodes::BeginNode(node.id);
+
+        NodeException ex = node.checkExceptions(editor);
+        imnodes::MarkNode(node.id, node.mark, node.markDescription);
 
         imnodes::BeginNodeTitleBar();
         ImGui::TextUnformatted(config.title.c_str());

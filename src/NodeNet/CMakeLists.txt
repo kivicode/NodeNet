@@ -46,7 +46,8 @@ add_executable(NodeNet
         src/main.cpp
         src/editor.h
         src/editor.cpp
-        imgui.ini
+        src/tinyfiledialogs.c
+        src/tinyfiledialogs.h
         imnodes.cpp
         imnodes.h
         Makefile src/data_types.cpp
@@ -60,6 +61,6 @@ add_executable(NodeNet
         src/data_types.h
         src/executor.cpp
         src/trainer.cpp
-        src/trainer.h src/dataset_manager.cpp src/dataset_manager.h src/code_manager.cpp src/code_manager.h src/logger.h)
+        src/trainer.h src/dataset_manager.cpp src/dataset_manager.h src/code_manager.cpp src/code_manager.h src/logger.h src/exceptions.h)
 
 target_link_libraries(NodeNet ${SDL2_LIBRARIES})

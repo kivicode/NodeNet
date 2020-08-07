@@ -10,10 +10,12 @@
 #include <utility>
 #include <vector>
 #include <string>
+#include <array>
 
 #include "utils.cpp"
 #include "executor.h"
-#include <array>
+#include "exceptions.h"
+#include "tinyfiledialogs.h"
 
 
 /* ========== NODE IO PIN ========== */
@@ -250,7 +252,44 @@ std::string Node::getInputName(Editor &editor) {
     return "";
 }
 
+bool Node::hasName(Editor& editor) {
+    int nameId;
+    if (this->_type == START) {
+        nameId = this->inputIds[0];
+    } else {
+//        std::cout << this->_type << " -===- " << FINISH << "\n";
+        nameId = this->inputIds[1];
+    }
+    return !std::string(this->inputs[nameId].s).empty() || editor.pinHasLink(nameId);
+}
+
+bool Node::hasLink(Editor& editor) {
+    if (this->_type == START) {
+        return true;
+    }
+    return editor.pinHasLink(this->inputIds[0]);
+}
+
+NodeException Node::checkExceptions(Editor &editor) {
+    if(!this->hasName(editor)) {
+        this->mark = imnodes::NodeMarks::Red;
+        this->markDescription = "Unnamed";
+        return NodeException(this->id, this->markDescription);
+    }
+    if(!this->hasLink(editor)) {
+        this->mark = imnodes::NodeMarks::Orange;
+        this->markDescription = "Not linked";
+        return NodeException(this->id, this->markDescription);
+    }
+    this->mark = imnodes::NodeMarks::None;
+    this->markDescription = "";
+    return NodeException(-1, ""); // placeholder
+}
+
 std::string Node::generateProcessedCode(Editor& editor) {
+    NodeException exc = this->checkExceptions(editor);
+    if (exc.nodeId != -1) throw exc; // check for 'placeholder' meanless exception
+
     this->replaceInputsWithValues(editor);
     this->deleteOutputsFromCode();
 

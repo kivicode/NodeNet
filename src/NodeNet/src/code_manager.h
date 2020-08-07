@@ -18,6 +18,7 @@ public:
         }
         return result;
     }
+
     void generateCode(Editor& editor){
         this->code = "";
         for (int i : editor.finishNodeIds) {
@@ -27,7 +28,10 @@ public:
             this->code += "\n\n";
         }
     }
+
     std::string getCode(){return this->code;}
+
+    char fileSavePath[1024] = {};
 
 private:
     std::vector<std::string> modelNames = {};

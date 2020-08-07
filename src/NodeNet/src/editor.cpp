@@ -5,6 +5,7 @@
 #include "trainer.h"
 #include "code_manager.h"
 #include "logger.h"
+#include "exceptions.h"
 
 #include <imnodes.h>
 #include <imgui.h>
@@ -82,21 +83,29 @@ namespace graphics {
 
         }
 
-
-//        ImGui::EndGroupPanel();
-
-
         ImGui::End();
     }
 
     void show_settings() {
         ImGui::Begin("Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-        ImGui::BeginGroupPanel("Scrolling", ImVec2(-1.0f, 0.0f));
 
-        ImGui::SliderFloat("Speed", &wheelSpeed, 0, 50);
-        ImGui::Checkbox("Invert", &invertScrolling);
+        if(ImGui::CollapsingHeader("Saving", ImGuiTreeNodeFlags_DefaultOpen)) {
+            ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.5f);
 
-        ImGui::EndGroupPanel();
+            ImGui::InputTextWithHint("", "Save path", codeManager.fileSavePath, 1024);
+
+            ImGui::SameLine();
+
+            if(ImGui::Button("Select path")) {
+                auto _path = tinyfd_selectFolderDialog("Add a dataset path", "");
+                if(!_path) return;
+                strncpy(codeManager.fileSavePath, _path, 1024);
+                std::string path = codeManager.fileSavePath;
+                console.log("Path: " + path);
+            }
+            ImGui::PopItemWidth();
+        }
+
         ImGui::End();
     }
 
@@ -107,9 +116,9 @@ namespace graphics {
 
         ImGui::Begin(editor_name);
 
-        if (ImGui::Button("Generate code")) {
-            generateCode();
-        }
+        if (ImGui::Button("Generate code")) generateCode();
+        ImGui::SameLine();
+        if (ImGui::Button("DEBUG")) debug();
 
         imnodes::BeginNodeEditor();
 
@@ -125,14 +134,17 @@ namespace graphics {
         graphics::handleDragging();
 
         graphics::handleNewLinks();
-        graphics::debug();
 
         ImGui::End();
     }
 
-
     void generateCode() {
-        codeManager.generateCode(editor);
+        try {
+            codeManager.generateCode(editor);
+        } catch (NodeException& exception) {
+            console.log("Unnamed node: " + exception.nodeTitle, LogLevel::ERR);
+            return;
+        }
         console.log("Code generated:\n" + codeManager.getCode());
     }
 
@@ -249,7 +261,15 @@ namespace graphics {
     }
 
     void debug() {
-//        std::cout << imnodes::IsEditorHovered() << "\n";
+//        char const * lTheSaveFileName;
+//        char const * lTheOpenFileName;
+//        char const * lTheSelectFolderName;
+//        FILE * lIn;
+//        char lBuffer[1024];
+        auto _path = tinyfd_selectFolderDialog("Add a dataset path", "");
+        if(!_path) return;
+        std::string path = _path;
+        console.log("Path: " + path);
     }
 
     void NodeEditorInitialize() {
