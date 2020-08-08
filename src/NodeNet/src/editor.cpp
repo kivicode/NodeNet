@@ -286,23 +286,23 @@ namespace graphics {
     }
 
     void debug() {
-        std::ofstream os;
-        os.open("out.cereal", std::ios::out | std::ios::binary);
-        cereal::BinaryOutputArchive archive( os );
-
-        NodeIOPin test("test", true);
-        archive( test );
-        os.close();
-
-        {
-            NodeIOPin dst("",false);
-            std::ifstream fs;
-            fs.open("out.cereal", std::ios::in | std::ios::binary);
-            cereal::BinaryInputArchive iarchive(fs);
-            iarchive(dst);
-            fs.close();
-            console.log(dst.name);
-        }
+//        std::ofstream os;
+//        os.open("out.cereal", std::ios::out | std::ios::binary);
+//        cereal::BinaryOutputArchive archive( os );
+//
+//        NodeIOPin test("test", true);
+//        archive( test );
+//        os.close();
+//
+//        {
+//            NodeIOPin dst("",false);
+//            std::ifstream fs;
+//            fs.open("out.cereal", std::ios::in | std::ios::binary);
+//            cereal::BinaryInputArchive iarchive(fs);
+//            iarchive(dst);
+//            fs.close();
+//            console.log(dst.name);
+//        }
 
 
     }
