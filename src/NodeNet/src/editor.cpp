@@ -7,12 +7,18 @@
 #include "logger.h"
 #include "exceptions.h"
 
+//#include <cereal/types/unordered_map.hpp>
+//#include <cereal/types/memory.hpp>
+//#include <cereal/archives/binary.hpp>
+//#include <fstream>
+#include "serializerTest.h"
+
+
 #include <imnodes.h>
 #include <imgui.h>
 
 #include <algorithm>
 #include <dependencies/imgui-1.76/imgui_internal.h>
-#include <future>
 
 namespace graphics {
 
@@ -280,7 +286,25 @@ namespace graphics {
     }
 
     void debug() {
-        trainer.start_exec("tree /");
+        std::ofstream os;
+        os.open("out.cereal", std::ios::out | std::ios::binary);
+        cereal::BinaryOutputArchive archive( os );
+
+        NodeIOPin test("test", true);
+        archive( test );
+        os.close();
+
+        {
+            NodeIOPin dst("",false);
+            std::ifstream fs;
+            fs.open("out.cereal", std::ios::in | std::ios::binary);
+            cereal::BinaryInputArchive iarchive(fs);
+            iarchive(dst);
+            fs.close();
+            console.log(dst.name);
+        }
+
+
     }
 
     void NodeEditorInitialize() {

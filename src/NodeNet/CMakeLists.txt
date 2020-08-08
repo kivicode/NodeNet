@@ -21,6 +21,12 @@ include_directories(dependencies/imgui-1.76)
 include_directories(fonts)
 include_directories(lib)
 include_directories(src)
+include_directories(include/)
+
+file(GLOB SOURCES
+        *.h
+        *.cpp
+        )
 
 add_executable(NodeNet
         dependencies/gl3w/include/GL/gl3w.h
@@ -51,6 +57,7 @@ add_executable(NodeNet
         imnodes.cpp
         imnodes.h
         Makefile src/data_types.cpp
+        ${SOURCES}
         src/generator.cpp
         src/settings.h
         src/utils.cpp
@@ -61,6 +68,6 @@ add_executable(NodeNet
         src/data_types.h
         src/executor.cpp
         src/trainer.cpp
-        src/trainer.h src/dataset_manager.cpp src/dataset_manager.h src/code_manager.h src/logger.h src/exceptions.h)
+        src/trainer.h src/dataset_manager.cpp src/dataset_manager.h src/code_manager.h src/logger.h src/exceptions.h src/serializerTest.h)
 
 target_link_libraries(NodeNet ${SDL2_LIBRARIES})

@@ -14,6 +14,11 @@
 #include <any>
 #include <string>
 
+#include <cereal/types/vector.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/common.hpp>
+#include <cereal/archives/binary.hpp>
+
 
 class Node;
 class Link;
@@ -28,11 +33,40 @@ enum SliderDataType : int {
     CODE
 };
 
-enum PrivatePinType {
+enum PrivatePinType : int{
     CUSTOM,
     FINISH,
     START
 };
+
+
+
+std::map<SliderDataType, std::string> SliderTypeMapForward = {{INTEGER, "INT"}, {FLOAT, "FLOAT"}, {STRING, "STRING"}, {STRING_SELECTOR, "STRING_SELECTOR"}, {CODE, "CODE"}};
+std::map<std::string, SliderDataType> SliderTypeMapReverse = {{"INT", INTEGER}, {"FLOAT", FLOAT}, {"STRING", STRING}, {"STRING_SELECTOR", STRING_SELECTOR}, {"CODE", CODE}};
+
+std::string SliderType_tostring( SliderDataType c ) {
+    return SliderTypeMapForward[c];
+}
+
+SliderDataType SliderType_fromstring( std::string const & s ) {
+    return SliderTypeMapReverse[s];
+}
+
+namespace cereal {
+    template <class Archive> inline
+    std::string save_minimal( Archive const &, SliderDataType const & t )
+    {
+        return SliderType_tostring( t );
+    }
+
+    template <class Archive> inline
+    void load_minimal( Archive const &, SliderDataType & t, std::string const & value )
+    {
+        t = SliderType_fromstring( value );
+    }
+}
+
+
 
 class NodeIOPin {
 public:
@@ -58,6 +92,20 @@ public:
     NodeIOPin(std::string name, bool isEditable, float minSliderVal, float maxSliderVal, float sliderSpeed);
 
     NodeIOPin(std::string name, bool isEditable, SliderDataType dataType, float minSliderVal, float maxSliderVal, float sliderSpeed);
+
+    template<class Archive>
+    void serialize( Archive &archive )
+    {
+        auto dtype = static_cast<int>( dataType );
+        archive( cereal::make_nvp( "name", name ), cereal::make_nvp( "dtype", dtype ) );
+        dataType = static_cast<SliderDataType>( dtype );
+    }
+
+//    template <class Archive>
+//    void load( Archive & ar ) const
+//    {
+//        ar( name, isEditable, dataType );
+//    }
 };
 
 class NodeConfig {
