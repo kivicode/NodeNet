@@ -72,7 +72,7 @@ enum AttributeFlags
     AttributeFlags_EnableLinkCreationOnSnap = 1 << 1
 };
 
-enum NodeMarks {
+enum NodeMarks: int {
     None,
     Red,
     Orange
@@ -234,6 +234,7 @@ void Link(int id, int start_attribute_id, int end_attribute_id);
 // Set's the node's position corresponding to the node id, either using screen space coordinates, or
 // node editor grid coordinates. You can even set the position before the node has been created with
 // BeginNode().
+
 
 void SetNodeScreenSpacePos(int node_id, const ImVec2& screen_space_pos);
 void SetNodeGridSpacePos(int node_id, const ImVec2& grid_pos);
