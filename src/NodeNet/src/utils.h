@@ -26,8 +26,6 @@
 
 #define GLOBAL_PIN_ID_TO_LOCAL(node, internalId) GET_INPUT_ID(node, node.inputs.size() + internalId)
 
-#define STR(x) std::to_string(x)
-
 template < typename T>
 std::pair<bool, int > findInVector(const std::vector<T>& vecOfElements, const T  & element);
 

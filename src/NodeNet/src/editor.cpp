@@ -28,8 +28,6 @@ namespace graphics {
     void updateLinks();
     void drawNode(Node &node);
     void debug();
-    void debugSave();
-    void debugLoad();
 
     std::string consoleLogString;
     std::string consoleCodeString;
@@ -43,14 +41,11 @@ namespace graphics {
     DatasetManager dataset;
     CodeManager codeManager;
 
-    imnodes::EditorContext *imnodes_context = nullptr;
 
-
+    bool draggingWasStarted = false;
     ImVec2 posWhenStartedDragging = ImVec2(0, 0);
     float wheelSpeed = 10;
-    bool draggingWasStarted = false;
     bool invertScrolling= false;
-    bool updatePosesAfterLoading = false;
 
     void show_code_inspector() {
         ImGui::Begin("Code");
@@ -124,7 +119,7 @@ namespace graphics {
     void train();
 
     void show_editor(const char *editor_name, Editor& _editor) {
-        imnodes::EditorContextSet(imnodes_context);
+        imnodes::EditorContextSet(_editor.context);
 
         ImGui::Begin(editor_name);
 
@@ -132,11 +127,10 @@ namespace graphics {
         ImGui::SameLine();
         if (ImGui::Button("Train")) train();
         ImGui::SameLine();
-        if (ImGui::Button("Debug")) debug();
+        if (ImGui::Button("DEBUG")) debug();
         ImGui::SameLine();
-        if (ImGui::Button("Save")) debugSave();
-        ImGui::SameLine();
-        if (ImGui::Button("Load")) debugLoad();
+        float test = 0;
+        ImGui::InputFloat("abc", &test);
 
         imnodes::BeginNodeEditor();
 
@@ -291,35 +285,30 @@ namespace graphics {
         imnodes::EditorContextResetPanning(ImVec2(cur.x - (ImGui::GetIO().MouseWheelH * speed), cur.y + (ImGui::GetIO().MouseWheel * speed)));
     }
 
-    void debug() {}
+    void debug() {
+        std::ofstream os;
+        os.open("out.cereal", std::ios::out | std::ios::binary);
+        cereal::BinaryOutputArchive archive( os );
 
-    void debugLoad() {
-//        std::ifstream fs;
-//        fs.open("out.cereal", std::ios::in | std::ios::binary);
-//        cereal::BinaryInputArchive iarchive(fs);
-//        iarchive(editor);
-//        fs.close();
-//
-//        for(Node& node : editor.nodes) {
-//            imnodes::SetNodeGridSpacePos(node.id, node.gridPosition);
-//        }
-    }
+        NodeIOPin test("test", true);
+        archive( test );
+        os.close();
 
-    void debugSave() {
-//        std::ofstream os;
-//        os.open("out.cereal", std::ios::out | std::ios::binary);
-//        cereal::BinaryOutputArchive archive( os );
-//
-//        for(Node& node : editor.nodes) {
-//            node.gridPosition = imnodes::GetNodeGridPos(node.id);
-//        }
-//
-//        archive( editor );
-//        os.close();
+        {
+            NodeIOPin dst("",false);
+            std::ifstream fs;
+            fs.open("out.cereal", std::ios::in | std::ios::binary);
+            cereal::BinaryInputArchive iarchive(fs);
+            iarchive(dst);
+            fs.close();
+            console.log(dst.name);
+        }
+
+
     }
 
     void NodeEditorInitialize() {
-        imnodes_context = imnodes::EditorContextCreate();
+        editor.context = imnodes::EditorContextCreate();
         imnodes::PushAttributeFlag(imnodes::AttributeFlags_EnableLinkDetachWithDragClick);
 
         imnodes::IO& io = imnodes::GetIO();
@@ -337,6 +326,6 @@ namespace graphics {
 
     void NodeEditorShutdown() {
         imnodes::PopAttributeFlag();
-        imnodes::EditorContextFree(imnodes_context);
+        imnodes::EditorContextFree(editor.context);
     }
 } // namespace example
