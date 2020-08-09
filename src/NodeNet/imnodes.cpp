@@ -2031,6 +2031,20 @@ void PopStyleVar()
     style_var = style_elem.value;
 }
 
+ImVec2 GetNodeGridSpacePos(int node_id) {
+    assert(initialized);
+    EditorContext& editor = editor_context_get();
+    NodeData& node = editor.nodes.find_or_create_new(node_id);
+    return node.origin;
+}
+
+ImVec2 GetNodeScreenSpacePos(int node_id) {
+    assert(initialized);
+    EditorContext& editor = editor_context_get();
+    NodeData& node = editor.nodes.find_or_create_new(node_id);
+    return screen_space_to_grid_space(node.origin);
+}
+
 void SetNodeScreenSpacePos(int node_id, const ImVec2& screen_space_pos)
 {
     // Remember to call Initialize() before using any other functions!

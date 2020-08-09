@@ -135,4 +135,8 @@ namespace NodeGenerator {
         node.init();
     }
 
+    NodeConfig configFromFile() {
+        
+    }
+
 }

@@ -235,6 +235,9 @@ void Link(int id, int start_attribute_id, int end_attribute_id);
 // node editor grid coordinates. You can even set the position before the node has been created with
 // BeginNode().
 
+ImVec2 GetNodeGridSpacePos(int node_id);
+ImVec2 GetNodeScreenSpacePos(int node_id);
+
 void SetNodeScreenSpacePos(int node_id, const ImVec2& screen_space_pos);
 void SetNodeGridSpacePos(int node_id, const ImVec2& grid_pos);
 // Enable or disable the ability to click and drag a specific node.
