@@ -290,7 +290,11 @@ namespace graphics {
         imnodes::EditorContextResetPanning(ImVec2(cur.x - (ImGui::GetIO().MouseWheelH * speed), cur.y + (ImGui::GetIO().MouseWheel * speed)));
     }
 
-    void debug(){}
+    void debug(){
+        std::string path = "/Users/kivicode/Documents/GitHub/NodeNet/src/NodeNet/templates/finish.node";
+        CodeExecutor::configFromFile(path);
+//        std::cout << "Decl: " << CodeExecutor::cutDeclarationSegment(readFile(path));
+    }
 
     void debug_save() {
         std::ofstream os;

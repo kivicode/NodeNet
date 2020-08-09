@@ -10,11 +10,13 @@
 #include <array>
 #include <sstream>
 #include <iostream>
+#include "data_types.h"
 
-namespace Executor {
+namespace CodeExecutor {
 
     std::regex find_input_call_regex( R"(input+\()");
     std::regex find_output_call_regex(R"(output+\()");
+    std::regex find_declaration_segment_regex(R"([^<%][\s\S]*%>)");
 
     std::vector<std::array<int, 3>> findRegexInCode(std::string baseCode, std::regex regex) { // {line number, character index (inside the line), substring length}
         std::vector<std::array<int, 3>> output = {};
@@ -56,18 +58,153 @@ namespace Executor {
         return -1;
     }
 
+    std::vector<std::string> split(const std::string &s, char delim) {
+        std::vector<std::string> elems;
+        std::stringstream ss(s);
+        std::string part;
+        while(std::getline(ss, part, delim)) {
+            elems.push_back(part);
+        }
+        return elems;
+    }
+
     std::vector<std::pair<bool, std::array<int, 3>>> getIOCodePositionsAndLengths( const std::string& baseCode) { // <bool, {int, int, int}> ==> <isInput, {line number, character index (inside the line), substring length}>
 
         std::vector<std::pair<bool, std::array<int, 3>>> output = {};
 
-        for(auto res : Executor::findRegexInCode(baseCode, find_input_call_regex)) {
+        for(auto res : CodeExecutor::findRegexInCode(baseCode, find_input_call_regex)) {
             output.emplace_back(true, res);
         }
 
-        for(auto res : Executor::findRegexInCode(baseCode, find_output_call_regex)) {
+        for(auto res : CodeExecutor::findRegexInCode(baseCode, find_output_call_regex)) {
             output.emplace_back(false, res);
         }
         return output;
+    }
+
+    std::string cutDeclarationSegment(std::string code) {
+        std::stringstream ss(code);
+        std::string block, line;
+        std::smatch sm;
+        regex_search(code, sm, find_declaration_segment_regex);
+        return sm.str();
+    }
+
+    CodeIODeclaration getInCodeIODeclarations(std::string code, std::string targetRegex, std::string realToken) {
+        CodeIODeclaration result(code);
+
+        const std::regex regex(targetRegex);
+        std::stringstream ss(code);
+        std::string line;
+        std::smatch sm;
+        int lineCounter = 0;
+
+        while (std::getline(ss, line, '\n')) { // iterate over lines
+            int n = 0;
+            while (regex_search(line, sm, regex)) {
+
+                int L = (int)std::string(realToken).size() - 1; // offset shift size in order to replace the whole statement
+                auto match = sm[1];
+                int pos = sm.position(1);
+                int endPos = CodeExecutor::getClosingBracketPos(line, pos, false);
+
+                //// input("just a name") = ...
+                ////       ^           ^
+                ////     pos+1     nameEndPos
+                std::string name = line.substr(pos + 1, endPos - 1);
+                int nameEndPos = CodeExecutor::firstCharMatch(name, ')') - 1;
+                name = name.substr(0, nameEndPos);
+
+                result.add(lineCounter, pos, endPos, name);
+
+                // replace input statement with it's actual value
+                line.erase(pos - L, endPos - (pos - L) + 2);
+
+                if(++n == MAX_INLINE_PIN_DECLARATIONS) break; // infinite while fuse
+            }
+            lineCounter++;
+        }
+        return result;
+    }
+
+    NodeIOPin processSignleDeclarationLine(std::string line) { // pin, found
+        if (countChar(line, ' ') == 0)  line = line.append(" ");
+
+        std::stringstream ss(line);
+        auto paramList = split(line, ' ');
+
+        NodeIOPin result;
+
+        result.isInput = paramList.at(0) == "input";
+        paramList.erase(paramList.begin());
+
+        bool trigDefaultOption = false;
+        std::string default_option = "";
+
+
+        for (std::string part : paramList) {
+            auto deconstructed = split(part, '=');
+            if (deconstructed.size() < 2) continue;
+            std::string param = deconstructed.at(0), val = deconstructed.at(1);
+            if (param == "name") result.name = val;
+            if (param == "type") {
+                if      (val == "int")    result.dataType = SliderDataType::INTEGER;
+                else if (val == "float")  result.dataType = SliderDataType::FLOAT;
+                else if (val == "string") result.dataType = SliderDataType::STRING;
+
+                else if (val == "int_drag")    result.dataType = SliderDataType::INTEGER_DRAG;
+                else if (val == "float_drag")  result.dataType = SliderDataType::FLOAT_DRAG;
+                else if (val == "string_list") result.dataType = SliderDataType::STRING_SELECTOR;
+            }
+            if (param == "min_val")    result.minSliderVal = std::atof(val.c_str());
+            if (param == "max_val")    result.maxSliderVal = std::atof(val.c_str());
+            if (param == "drag_speed") result.sliderSpeed  = std::atof(val.c_str());
+
+            if (param == "options") {
+                val = val.substr(1, val.size()-2);
+                std::cout << "Val: " << val << "\n";
+                for (std::string option : split(val, ',')) {
+                    result.options.push_back(option);
+                }
+            }
+            if (param == "default_option") {
+                default_option = val;
+                trigDefaultOption = true;
+            }
+        }
+
+        if (trigDefaultOption) {
+            for(int i = 0; i < result.options.size(); i++) {
+                if (result.options.at(i) == default_option) {
+                    result.selectedOption = i;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+    std::array<std::vector<NodeIOPin>, 2> getPinsFromDeclarationSegment(std::string code) {
+        return {};
+    }
+
+    NodeConfig configFromFile(std::string path) {
+        NodeConfig result;
+        std::string fileContent = readFile(path);
+
+//        CodeIODeclaration inputs  = getInCodeIODeclarations(fileContent, R"(input\((.*)\))", "input(\"");
+//        CodeIODeclaration outputs = getInCodeIODeclarations(fileContent, R"(output\((.*)\))", "output(\"");
+//        for(std::string name : inputs.names) {
+//            std::cout << "Config input name: " << name << "\n";
+//        }
+//        for(std::string name : outputs.names) {
+//            std::cout << "Config output name: " << name << "\n";
+//        }
+
+        std::string declarator = cutDeclarationSegment(fileContent);
+        NodeIOPin pin = processSignleDeclarationLine("input name=\"Name\" type=int_drag options={a,b,c} default_option=c");
+        std::cout << pin.name << " " << (pin.dataType == SliderDataType::INTEGER_DRAG) << " " << pin.options.at(1) << " " << pin.selectedOption << "\n";
+
+        return result;
     }
 }
 

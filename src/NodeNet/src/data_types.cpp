@@ -181,13 +181,13 @@ void Node::replaceInputsWithValues(Editor& editor) {
             int L = (int)std::string("input(\"").size() - 1; // offset shift size in order to replace the whole statement
             auto match = sm[1];
             int pos = sm.position(1);
-            int endPos = Executor::getClosingBracketPos(line, pos, false);
+            int endPos = CodeExecutor::getClosingBracketPos(line, pos, false);
 
             //// input("just a name") = ...
             ////       ^           ^
             ////     pos+1     nameEndPos
             std::string name = line.substr(pos + 1, endPos - 1);
-            int nameEndPos = Executor::firstCharMatch(name, ')') - 1;
+            int nameEndPos = CodeExecutor::firstCharMatch(name, ')') - 1;
             name = name.substr(0, nameEndPos);
             std::any val = this->getInputValueById(editor, this->inputIdByName(name));
 
@@ -228,7 +228,7 @@ void Node::deleteOutputsFromCode() {
             int L = (int)std::string("output(\"").size() - 1; // offset shift size in order to replace the whole statement
             auto match = sm[1];
             int pos = sm.position(1);
-            int endPos = Executor::getClosingBracketPos(line, pos, false);
+            int endPos = CodeExecutor::getClosingBracketPos(line, pos, false);
 
             // replace input statement with it's actual value
             line.erase(pos - L, endPos - (pos - L) + 2);

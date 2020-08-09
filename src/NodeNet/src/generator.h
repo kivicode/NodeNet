@@ -15,6 +15,8 @@ namespace NodeGenerator {
     void buildTestNode(Node &node, const std::string &path);
     void buildFinishNode(Node &node, const std::string &path);
     void buildStartNode(Node &node, const std::string &path);
+    CodeIODeclaration getCodeIODeclarations(std::string code, std::string regex, std::string token);
+    NodeConfig configFromFile(std::string path);
 
 }
 

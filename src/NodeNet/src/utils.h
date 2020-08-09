@@ -39,5 +39,10 @@ std::string generateIndentation(int indentation) {
 
 std::string readFile(const std::string& path);
 
+size_t countChar(std::string s, char target) {
+    return std::count_if( s.begin(), s.end(), [target]( char c ){if(c == target) return true; });
+}
+
+
 
 #endif //NODENET_UTILS_H

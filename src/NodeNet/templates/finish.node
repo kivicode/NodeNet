@@ -1,1 +1,10 @@
+<%
+
+input name="Name" type=int
+input | output  \t name \t type \t {params}
+input | output  \t name \t type \t {params}
+
+%>
+
 input("Name") = Model(inputs={{INPUT_NAME}}, outputs=input("Link"))
+

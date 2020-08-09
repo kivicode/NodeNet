@@ -24,8 +24,8 @@ include_directories(src)
 include_directories(include/)
 
 file(GLOB SOURCES
-        *.h
-        *.cpp
+        include/*.h
+        include/*.cpp
         )
 
 add_executable(NodeNet

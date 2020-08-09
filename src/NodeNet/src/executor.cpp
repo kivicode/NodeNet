@@ -6,12 +6,14 @@
 #define NODENET_EXECTOR_CPP
 
 #include "executor.h"
+#include "data_types.h"
 
 #include <regex>
 #include <array>
 #include <sstream>
 
-//std::vector<std::pair<bool, std::array<int, 3>>> Executor::getIOCodePositionsAndLengths( std::string baseCode) { // <bool, {int, int, int}> ==> <isInput, {line number, character index (inside the line), substring length}>
+
+//std::vector<std::pair<bool, std::array<int, 3>>> CodeExecutor::getIOCodePositionsAndLengths( std::string baseCode) { // <bool, {int, int, int}> ==> <isInput, {line number, character index (inside the line), substring length}>
 //    std::regex find_input_call_regex(R"((?:.*)\ *=\ *?input+\((.*)\))");
 //    std::regex find_output_call_regex(R"((?:\ *)output+\((.*)\))");
 //
@@ -43,7 +45,7 @@
     std::vector<PinLocation> getSequenceOfPinsForInputValue(Editor &editor, PinLocation startPinLocation) {
         std::vector<PinLocation > sequence = {};
 
-        auto initialSearchResult = Executor::getNextPinLocation(editor, editor.nodes[startPinLocation.first],
+        auto initialSearchResult = CodeExecutor::getNextPinLocation(editor, editor.nodes[startPinLocation.first],
                                                                 startPinLocation.second);
         if (initialSearchResult.second) { // there is a node that's been connected to the current finish node
             bool isEndNodes;
@@ -51,7 +53,7 @@
 
             do { //  literally first time I use do/while instead of while
 
-                auto searchResult = Executor::getNextPinLocation(editor,
+                auto searchResult = CodeExecutor::getNextPinLocation(editor,
                                                                  editor.nodes[newPinLocationToCheck.first],
                                                                  newPinLocationToCheck.second);
 

@@ -14,20 +14,40 @@
 #include <any>
 #include <string>
 
-#include <cereal/types/vector.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/types/common.hpp>
 #include <cereal/archives/binary.hpp>
+#include <cereal/types/vector.hpp>
+#include <cereal/types/map.hpp>
 
 
 class Node;
 class Link;
 class Editor;
 
+struct CodeIODeclaration {
+    std::string code;
+    std::vector<std::string> names;
+    std::vector<int> lineNumbers;
+    std::vector<int> startPoses;
+    std::vector<int> endPoses;
+
+    CodeIODeclaration(std::string code): code(std::move(code)){}
+
+    void add(int lineNumber, int startPos, int endPos, std::string name="") {
+        this->lineNumbers.push_back(lineNumber);
+        this->startPoses.push_back(startPos);
+        this->endPoses.push_back(endPos);
+        this->names.push_back(name);
+    }
+};
+
 
 enum SliderDataType : int {
     INTEGER,
+    INTEGER_DRAG,
     FLOAT,
+    FLOAT_DRAG,
     STRING,
     STRING_SELECTOR,
     CODE
@@ -39,33 +59,10 @@ enum PrivatePinType : int{
     START
 };
 
-
-
-std::map<SliderDataType, std::string> SliderTypeMapForward = {{INTEGER, "INT"}, {FLOAT, "FLOAT"}, {STRING, "STRING"}, {STRING_SELECTOR, "STRING_SELECTOR"}, {CODE, "CODE"}};
-std::map<std::string, SliderDataType> SliderTypeMapReverse = {{"INT", INTEGER}, {"FLOAT", FLOAT}, {"STRING", STRING}, {"STRING_SELECTOR", STRING_SELECTOR}, {"CODE", CODE}};
-
-std::string SliderType_tostring( SliderDataType c ) {
-    return SliderTypeMapForward[c];
+template<class Archive>
+void serialize(Archive & archive, ImVec2& vec) {
+    archive(vec.x, vec.y);
 }
-
-SliderDataType SliderType_fromstring( std::string const & s ) {
-    return SliderTypeMapReverse[s];
-}
-
-namespace cereal {
-    template <class Archive> inline
-    std::string save_minimal( Archive const &, SliderDataType const & t )
-    {
-        return SliderType_tostring( t );
-    }
-
-    template <class Archive> inline
-    void load_minimal( Archive const &, SliderDataType & t, std::string const & value )
-    {
-        t = SliderType_fromstring( value );
-    }
-}
-
 
 
 class NodeIOPin {
@@ -78,11 +75,14 @@ public:
     float minSliderVal = 0;
     float maxSliderVal = 1;
     float sliderSpeed = .1;
-    std::vector<std::string> options;
+
+    std::vector<std::string> options = {};
     int selectedOption = 0;
 
     bool isStaff = false;
+    bool isInput = false;
 
+    NodeIOPin() = default;
     NodeIOPin(std::string name, bool isEditable);
 
     NodeIOPin(std::string name, bool isEditable, SliderDataType dataType);
@@ -94,18 +94,10 @@ public:
     NodeIOPin(std::string name, bool isEditable, SliderDataType dataType, float minSliderVal, float maxSliderVal, float sliderSpeed);
 
     template<class Archive>
-    void serialize( Archive &archive )
-    {
-        auto dtype = static_cast<int>( dataType );
-        archive( cereal::make_nvp( "name", name ), cereal::make_nvp( "dtype", dtype ) );
-        dataType = static_cast<SliderDataType>( dtype );
+    void serialize( Archive &archive ) {
+        archive(CEREAL_NVP(name), CEREAL_NVP(isEditable), CEREAL_NVP(static_cast<int>(dataType)), CEREAL_NVP(minSliderVal), CEREAL_NVP(maxSliderVal), CEREAL_NVP(sliderSpeed), CEREAL_NVP(options), CEREAL_NVP(selectedOption), CEREAL_NVP(isStaff));
     }
 
-//    template <class Archive>
-//    void load( Archive & ar ) const
-//    {
-//        ar( name, isEditable, dataType );
-//    }
 };
 
 class NodeConfig {
@@ -122,14 +114,19 @@ public:
     NodeConfig(std::string title, std::vector<NodeIOPin> inputs, std::vector<NodeIOPin> outputs);
 
     void setCode(std::string newCode);
+
+    template<class Archive>
+    void serialize( Archive &archive ) {
+        archive(CEREAL_NVP(title), CEREAL_NVP(inputs), CEREAL_NVP(baseCode));
+    }
 };
 
 struct IOData {
-    char s[INPUT_BUFF_SIZE];
-    float f;
-    int i;
+    char s[INPUT_BUFF_SIZE] = {};
+    float f = 0;
+    int i = 0;
 
-    SliderDataType dtype;
+    SliderDataType dtype = INTEGER;
 
     void empty() {
         strcpy(this->s, "");
@@ -142,6 +139,11 @@ struct IOData {
         strcpy(this->s, str.c_str());
         std::cout << "C_STR:: " << this->s << "\n";
     }
+
+    template<class Archive>
+    void serialize( Archive &archive ) {
+        archive(CEREAL_NVP(s), CEREAL_NVP(f), CEREAL_NVP(i));
+    }
 };
 
 
@@ -149,6 +151,8 @@ class Node {
 public:
     int id;
     float value;
+
+    ImVec2 gridPosition = {0, 0};
 
     std::string baseCode = "";
     std::string processedCode = "";
@@ -166,8 +170,7 @@ public:
     std::map<int, IOData>  inputs = {};
     std::map<int, IOData> outputs = {};
 
-    std::any test;
-
+    Node() = default;
     Node(int i, float v);
 
     [[nodiscard]] std::pair<int, bool> globalPinIdToLocal(int globalId) const;
@@ -180,8 +183,18 @@ public:
 
     int inputIdByName(std::string& name);
     std::any getInputValueById(Editor &editor, int localIndex);
-private:
 
+    template<class Archive>
+    void serialize( Archive &archive ) {
+        archive(CEREAL_NVP(gridPosition),
+                CEREAL_NVP(config),
+                CEREAL_NVP(baseCode), CEREAL_NVP(processedCode),
+                CEREAL_NVP(static_cast<int>(_type)), CEREAL_NVP(static_cast<int>(mark)), CEREAL_NVP(markDescription),
+                CEREAL_NVP(inputIds), CEREAL_NVP(outputIds),
+                CEREAL_NVP(inputs), CEREAL_NVP(outputs));
+    }
+
+private:
     std::string getInputName(Editor &editor);
     void setProcessedCode(std::string code);
     void replaceInputsWithValues(Editor &editor);
@@ -200,11 +213,19 @@ public:
 
     Link();
     Link(int i, int start, int end);
+
+    template<class Archive>
+    void serialize( Archive &archive ) {
+        archive(CEREAL_NVP(id),
+                CEREAL_NVP(start_attr),
+                CEREAL_NVP(end_attr));
+    }
 };
 
 class Editor {
 public:
-    imnodes::EditorContext *context = nullptr;
+    Editor() = default;
+
     std::vector<Node> nodes;
     std::vector<Link> links;
 
@@ -224,6 +245,15 @@ public:
     std::pair<Node&, bool> getNodeThatHasPinById(int id);
 
     std::pair<PinLocation, bool> getNextPinLocation(Node& node, int localPinId); // returns: {{parent node id, local pin id}, was found?}
+
+    template<class Archive>
+    void serialize( Archive &archive ) {
+        archive(CEREAL_NVP(nodes),
+                CEREAL_NVP(links),
+                CEREAL_NVP(inputNodeIds),
+                CEREAL_NVP(finishNodeIds),
+                CEREAL_NVP(current_id));
+    }
 };
 
 #endif //NODENET_DATA_TYPES_H
