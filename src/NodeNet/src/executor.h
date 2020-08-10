@@ -82,12 +82,12 @@ namespace CodeExecutor {
         return output;
     }
 
-    std::string cutDeclarationSegment(std::string code) {
+    std::string getDeclarationSegment(std::string code) {
         std::stringstream ss(code);
         std::string block, line;
         std::smatch sm;
         regex_search(code, sm, find_declaration_segment_regex);
-        return sm.str();
+        return sm.str().substr(1, sm.str().length()-1-2);
     }
 
     CodeIODeclaration getInCodeIODeclarations(std::string code, std::string targetRegex, std::string realToken) {
@@ -134,15 +134,19 @@ namespace CodeExecutor {
         auto paramList = split(line, ' ');
 
         NodeIOPin result;
+        result.name = "fuck";
 
         result.isInput = paramList.at(0) == "input";
         paramList.erase(paramList.begin());
 
         bool trigDefaultOption = false;
+        bool lock = false;
         std::string default_option = "";
 
 
         for (std::string part : paramList) {
+            if (part.empty()) continue;
+            if (part.at(0) == '@') continue;
             auto deconstructed = split(part, '=');
             if (deconstructed.size() < 2) continue;
             std::string param = deconstructed.at(0), val = deconstructed.at(1);
@@ -160,9 +164,11 @@ namespace CodeExecutor {
             if (param == "max_val")    result.maxSliderVal = std::atof(val.c_str());
             if (param == "drag_speed") result.sliderSpeed  = std::atof(val.c_str());
 
+            if (param == "lock" && val == "true") {lock = true;}
+            else if (param == "lock")             {lock = false;}
+
             if (param == "options") {
                 val = val.substr(1, val.size()-2);
-                std::cout << "Val: " << val << "\n";
                 for (std::string option : split(val, ',')) {
                     result.options.push_back(option);
                 }
@@ -181,29 +187,53 @@ namespace CodeExecutor {
                 }
             }
         }
+        result.isEditable = !lock;
         return result;
     }
-    std::array<std::vector<NodeIOPin>, 2> getPinsFromDeclarationSegment(std::string code) {
-        return {};
+
+    std::array<std::vector<NodeIOPin>, 2> getPinsFromDeclarationSegment(const std::string& code) {
+        std::vector<NodeIOPin> inputs, outputs;
+        for(const std::string& line : split(code, '\n')) {
+            if (line.empty() || line == "\n" || line == "\t" || line == " ") continue;
+            NodeIOPin pin = processSignleDeclarationLine(line);
+            if (pin.isInput) { inputs.push_back(pin); }
+            else { outputs.push_back(pin); }
+        }
+        return {inputs, outputs};
     }
 
-    NodeConfig configFromFile(std::string path) {
+    NodeConfig configFromFile(const std::string& path) {
         NodeConfig result;
         std::string fileContent = readFile(path);
+        std::string declarationSegment;
 
-//        CodeIODeclaration inputs  = getInCodeIODeclarations(fileContent, R"(input\((.*)\))", "input(\"");
-//        CodeIODeclaration outputs = getInCodeIODeclarations(fileContent, R"(output\((.*)\))", "output(\"");
-//        for(std::string name : inputs.names) {
-//            std::cout << "Config input name: " << name << "\n";
-//        }
-//        for(std::string name : outputs.names) {
-//            std::cout << "Config output name: " << name << "\n";
-//        }
+        try {
+            declarationSegment = getDeclarationSegment(fileContent);
+        } catch (std::out_of_range& err) {
+            return result;
+        }
 
-        std::string declarator = cutDeclarationSegment(fileContent);
-        NodeIOPin pin = processSignleDeclarationLine("input name=\"Name\" type=int_drag options={a,b,c} default_option=c");
-        std::cout << pin.name << " " << (pin.dataType == SliderDataType::INTEGER_DRAG) << " " << pin.options.at(1) << " " << pin.selectedOption << "\n";
+        auto lines = split(declarationSegment, '\n');
+        if (lines.empty()) return NodeConfig();
 
+        std::string nodeTitle = lines.at(0);
+        declarationSegment = declarationSegment.substr(nodeTitle.length(), declarationSegment.length()+1); // remove title statement from the segment
+
+        for (auto line : split(declarationSegment, '\n')) {
+            if(line.empty()) continue;
+
+            if (line.at(0) == '@') {
+                if (line.substr(1, line.size()) == "start_node")  result.type = START;
+                if (line.substr(1, line.size()) == "finish_node") result.type = FINISH;
+                declarationSegment = declarationSegment.substr(line.size()+2, declarationSegment.size());
+            }
+        }
+
+        auto pins = getPinsFromDeclarationSegment(declarationSegment);
+        result.inputs  = pins.at(0);
+        result.outputs = pins.at(1);
+        result.title = nodeTitle;
+        result.setCode(trim(fileContent.substr(fileContent.rfind("%>")+2, fileContent.size())));
         return result;
     }
 }

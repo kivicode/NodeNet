@@ -1,0 +1,7 @@
+<%
+Dense
+input name=Units type=int_drag min_val=0 max_val=100 drag_speed=1
+input name=Activation type=string_list options={relu,softmax}
+%>
+
+input("Name") = Dense(input("Units"), activation="input("Activation")")(input("Link"))

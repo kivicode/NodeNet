@@ -50,21 +50,24 @@ namespace NodeGenerator {
                     switch(config.inputs[i].dataType) {
                         case SliderDataType::FLOAT:
                             ImGui::InputFloat("##hidelabel", &node.inputs[pinId].f, 0, 0);
-//                            ImGui::DragFloat("##hidelabel", &node.inputs[pinId].f,
-//                                                                  config.inputs[i].sliderSpeed,
-//                                                                  config.inputs[i].minSliderVal,
-//                                                                  config.inputs[i].maxSliderVal);
+                            break;
+
+                        case SliderDataType::FLOAT_DRAG:
+                            ImGui::DragFloat("##hidelabel", &node.inputs[pinId].f,
+                                             config.inputs[i].sliderSpeed,
+                                             config.inputs[i].minSliderVal,
+                                             config.inputs[i].maxSliderVal);
                             break;
 
                         case SliderDataType::INTEGER:
                             ImGui::InputInt("##hidelabel", &node.inputs[pinId].i, 0, 0);
+                            break;
 
-                            node.inputs[pinId].i = std::max(node.inputs[pinId].i, 0);
-
-//                            ImGui::DragInt("##hidelabel", &node.inputs[pinId].i,
-//                                           config.inputs[i].sliderSpeed,
-//                                           (int)config.inputs[i].minSliderVal,
-//                                           (int)config.inputs[i].maxSliderVal);
+                        case SliderDataType::INTEGER_DRAG:
+                            ImGui::DragInt("##hidelabel", &node.inputs[pinId].i,
+                                           config.inputs[i].sliderSpeed,
+                                           (int)config.inputs[i].minSliderVal,
+                                           (int)config.inputs[i].maxSliderVal);
                             break;
 
                         case SliderDataType::STRING:
@@ -122,17 +125,24 @@ namespace NodeGenerator {
     }
 
     void buildFinishNode(Node &node, const std::string &path) {
-        node._type = PrivatePinType::FINISH;
         finish_config.setCode(readFile(path));
-        node.setConfig(finish_config);
+        node.setConfig(CodeExecutor::configFromFile(path));
         node.init();
     }
 
     void buildStartNode(Node &node, const std::string &path) {
         node._type = PrivatePinType::START;
         start_config.setCode(readFile(path));
+        start_config.type = START;
         node.setConfig(start_config);
         node.init();
     }
+
+    void buildNode(Node &node, const std::string &path) {
+        node.setConfig(CodeExecutor::configFromFile(path));
+        node.init();
+    }
+
+
 
 }

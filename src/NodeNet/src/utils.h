@@ -7,6 +7,9 @@
 
 #include <iostream>
 #include <map>
+#include <vector>
+#include "tinydir.h"
+
 
 //template<typename T>
 //bool VECTOR_CONTAINS(std::vector<T> vector, T value);
@@ -43,6 +46,43 @@ size_t countChar(std::string s, char target) {
     return std::count_if( s.begin(), s.end(), [target]( char c ){if(c == target) return true; });
 }
 
+std::string trim(const std::string& str) {
+    std::string_view s(str);
+    s.remove_prefix(std::min(s.find_first_not_of(" \t\r\v\n"), s.size()));
+    s.remove_suffix(std::min(s.size() - s.find_last_not_of(" \t\r\v\n") - 1, s.size()));
+
+    return std::string(s);
+}
+
+void replaceAll(std::string& str, const std::string& from, const std::string& to) {
+    if(from.empty())
+        return;
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+    }
+}
+
+std::vector<tinydir_file> scanDir(const std::string& path) {
+    std::vector<tinydir_file> result = {};
+    tinydir_dir dir;
+    tinydir_open_sorted(&dir, path.c_str());
+    for (int i = 0; i < dir.n_files; i++) {
+        tinydir_file file;
+        tinydir_readfile_n(&dir, &file, i);
+        result.push_back(file);
+    }
+    tinydir_close(&dir);
+    return result;
+}
+
+std::string fnameToNodeName(std::string name) {
+    name.at(0) = toupper(name.at(0));
+    replaceAll(name, "_", " ");
+    replaceAll(name, ".node", "");
+    return name;
+}
 
 
 #endif //NODENET_UTILS_H

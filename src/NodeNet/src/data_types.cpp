@@ -134,7 +134,6 @@ std::string Node::getPrevVarname(Editor &editor, std::pair<Link, bool> link) {
 
     if (link.second) {
         Node node = editor.getNodeThatHasPinById(link.first.start_attr).first;
-        std::cout << "POP:: " << node.inputIds[0] << " | " << node.inputIds[1] << "\n";
         return node.inputs[node.inputIds[node._type == START ? 0 : 1]].s;
     }
     return std::string("<error: not connected anywhere>");
@@ -150,6 +149,7 @@ void Node::setProcessedCode(std::string code) {
 }
 
 void Node::setConfig(NodeConfig newConfig) {
+    this->_type = newConfig.type;
     if (this->_type == PrivatePinType::CUSTOM || this->_type == PrivatePinType::FINISH) {
 
         NodeIOPin previousVarnamePin(LINK_PIN_TEXT, true, SliderDataType::CODE);
@@ -160,6 +160,9 @@ void Node::setConfig(NodeConfig newConfig) {
 
         newConfig.inputs.insert(newConfig.inputs.begin(), varnamePin);
         newConfig.inputs.insert(newConfig.inputs.begin(), previousVarnamePin);
+    }
+    if (this->_type == PrivatePinType::CUSTOM || this->_type == PrivatePinType::START) {
+        newConfig.outputs.insert(newConfig.outputs.begin(), NodeIOPin("", false, CODE));
     }
     this->setBaseCode(newConfig.baseCode);
     this->config = std::move(newConfig);
@@ -420,7 +423,6 @@ std::pair<Node&, bool> Editor::getNodeThatHasPinById(int id) {
 std::pair<PinLocation, bool> Editor::getNextPinLocation(Node &node, int localPinId) { // returns: {{parent node id, local pin id}, was found?}
 
     auto linkData = this->getLinkToPin(node, localPinId);
-    std::cout << linkData.first.start_attr << " " << linkData.second << "\n";
 
     if (linkData.second) { // link was found
         int newPinId = linkData.first.start_attr;

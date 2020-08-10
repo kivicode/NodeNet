@@ -68,6 +68,12 @@ add_executable(NodeNet
         src/data_types.h
         src/executor.cpp
         src/trainer.cpp
-        src/trainer.h src/dataset_manager.cpp src/dataset_manager.h src/code_manager.h src/logger.h src/exceptions.h src/serializerTest.h)
+        src/trainer.h
+        src/dataset_manager.cpp
+        src/dataset_manager.h
+        src/code_manager.h
+        src/logger.h
+        src/exceptions.h
+        src/serializerTest.h)
 
 target_link_libraries(NodeNet ${SDL2_LIBRARIES})

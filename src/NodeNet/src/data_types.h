@@ -103,6 +103,7 @@ public:
 class NodeConfig {
 public:
     std::string title = "";
+    PrivatePinType type = CUSTOM;
 
     std::vector<NodeIOPin> inputs = {};
     std::vector<NodeIOPin> outputs = {};
@@ -135,9 +136,7 @@ struct IOData {
     }
 
     void setString(std::string str) {
-        std::cout << "STR:: " << str << "\n";
         strcpy(this->s, str.c_str());
-        std::cout << "C_STR:: " << this->s << "\n";
     }
 
     template<class Archive>

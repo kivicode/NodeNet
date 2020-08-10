@@ -7,18 +7,13 @@
 #include "logger.h"
 #include "exceptions.h"
 
-//#include <cereal/types/unordered_map.hpp>
-//#include <cereal/types/memory.hpp>
-//#include <cereal/archives/binary.hpp>
-//#include <fstream>
-#include "serializerTest.h"
-
-
 #include <imnodes.h>
 #include <imgui.h>
 
 #include <algorithm>
 #include <dependencies/imgui-1.76/imgui_internal.h>
+
+namespace fs = std::filesystem;
 
 namespace graphics {
 
@@ -182,6 +177,28 @@ namespace graphics {
         NodeGenerator::generateFromConfig(editor, node, node.config);
     }
 
+    void spawnNode(const std::string& path) {
+        const int node_id = ++editor.current_id;
+        imnodes::SetNodeScreenSpacePos(node_id, ImGui::GetMousePos());
+        Node node = Node(node_id, 0.f);
+        editor.nodes.push_back(node);
+        editor.inputNodeIds.push_back(node.id);
+        NodeGenerator::buildNode(editor.nodes[editor.nodes.size() - 1], path);
+        if (editor.nodes[editor.nodes.size() - 1]._type == FINISH) editor.finishNodeIds.push_back(node.id - 1);
+        #ifdef DEBUG
+                std::cout << "Create node: " << node_id << "\n";
+        #endif
+    }
+
+    void makeMenuItemAndSpawnNodeFromFile(tinydir_file file) {
+        std::string name(file.name);
+        name = fnameToNodeName(name);
+
+        if (ImGui::MenuItem(name.c_str())) {
+            spawnNode(file.path);
+        }
+    }
+
     void updateLinks() {
         for (const Link &link : editor.links) {
             imnodes::Link(link.id, link.start_attr, link.end_attr);
@@ -227,45 +244,22 @@ namespace graphics {
         }
 
         if (ImGui::BeginPopup("Spawn node")) {
-            if (ImGui::MenuItem("Input node")) {
 
-                const int node_id = ++editor.current_id;
-                imnodes::SetNodeScreenSpacePos(node_id, ImGui::GetMousePos());
-                Node node = Node(node_id, 0.f);
-                editor.nodes.push_back(node);
-                editor.inputNodeIds.push_back(node.id);
-                NodeGenerator::buildStartNode(editor.nodes[editor.nodes.size() - 1],
-                                            "/Users/kivicode/Documents/GitHub/NodeNet/src/NodeNet/templates/start.node");
-#ifdef DEBUG
-                std::cout << "Create node: " << node_id << "\n";
-#endif
+            for (tinydir_file file : scanDir(PREFABS_PATH)) {
+                if (file.name[0] == '.') continue;
+
+                if (!file.is_dir) {
+                    makeMenuItemAndSpawnNodeFromFile(file);
+                } else {
+                    if (ImGui::BeginMenu(fnameToNodeName(file.name).c_str())){
+                        for (tinydir_file _file : scanDir(PREFABS_PATH)) {
+                            makeMenuItemAndSpawnNodeFromFile(_file);
+                        }
+                        ImGui::EndMenu();
+                    }
+                }
             }
-            else if (ImGui::MenuItem("Custom node")) {
 
-                const int node_id = ++editor.current_id;
-                imnodes::SetNodeScreenSpacePos(node_id, ImGui::GetMousePos());
-                Node node = Node(node_id, 0.f);
-                editor.nodes.push_back(node);
-                NodeGenerator::buildTestNode(editor.nodes[editor.nodes.size() - 1],
-                                             "/Users/kivicode/Documents/GitHub/NodeNet/src/NodeNet/templates/test.node");
-
-#ifdef DEBUG
-                std::cout << "Create node: " << node_id << "\n";
-#endif
-            }
-            else if (ImGui::MenuItem("Finish node")) {
-
-                const int node_id = ++editor.current_id;
-                imnodes::SetNodeScreenSpacePos(node_id, ImGui::GetMousePos());
-                Node node = Node(node_id, 0.f);
-                editor.nodes.push_back(node);
-                editor.finishNodeIds.push_back(node.id - 1);
-                NodeGenerator::buildFinishNode(editor.nodes[editor.nodes.size() - 1],
-                                               "/Users/kivicode/Documents/GitHub/NodeNet/src/NodeNet/templates/finish.node");
-#ifdef DEBUG
-                std::cout << "Create node: " << node_id << "\n";
-#endif
-            }
             ImGui::EndPopup();
         }
     }
@@ -293,7 +287,7 @@ namespace graphics {
     void debug(){
         std::string path = "/Users/kivicode/Documents/GitHub/NodeNet/src/NodeNet/templates/finish.node";
         CodeExecutor::configFromFile(path);
-//        std::cout << "Decl: " << CodeExecutor::cutDeclarationSegment(readFile(path));
+//        std::cout << "Decl: " << CodeExecutor::getDeclarationSegment(readFile(path));
     }
 
     void debug_save() {
