@@ -134,7 +134,6 @@ namespace CodeExecutor {
         auto paramList = split(line, ' ');
 
         NodeIOPin result;
-        result.name = "fuck";
 
         result.isInput = paramList.at(0) == "input";
         paramList.erase(paramList.begin());

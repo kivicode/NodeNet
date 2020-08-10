@@ -8,7 +8,6 @@
 #include <GL/gl3w.h>
 #include <dependencies/imgui-1.76/imgui_internal.h>
 
-
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui_internal.h"
 
@@ -469,6 +468,7 @@ int main(int, char**)
             ImGuiID dock_id_bottom = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down,  0.20f, nullptr, &dock_main_id);
             ImGuiID dock_id_center = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Up,    0.20f, nullptr, &dock_main_id);
 
+            ImGui::DockBuilderDockWindow("Code Editor",   dock_id_center); // editor
             ImGui::DockBuilderDockWindow("Nodes",         dock_id_center); // editor
             ImGui::DockBuilderDockWindow("Log",           dock_id_bottom); // bottom
             ImGui::DockBuilderDockWindow("Code",          dock_id_bottom); // bottom

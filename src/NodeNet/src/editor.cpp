@@ -12,6 +12,8 @@
 
 #include <algorithm>
 #include <dependencies/imgui-1.76/imgui_internal.h>
+#include "TextEditor.h"
+
 
 namespace fs = std::filesystem;
 
@@ -33,6 +35,7 @@ namespace graphics {
     char consoleInputBuff[1024] = {0};
 
     Editor editor;
+    TextEditor codeEditor;
     Logger console(&consoleLogString);
     Logger codeConsole(&consoleCodeString);
 
@@ -148,6 +151,33 @@ namespace graphics {
         graphics::handleNewLinks();
 
         ImGui::End();
+    }
+
+    void show_code_editor() {
+        ImGui::Begin("Code Editor");
+        codeEditor.Render("as");
+        codeEditor.Render("b");
+        ImGui::End();
+    }
+
+    void initCodeEditor() {
+        auto lang = TextEditor::LanguageDefinition::NodeScript();
+
+        codeEditor.SetLanguageDefinition(lang);
+        codeEditor.SetPalette(TextEditor::GetDarkPalette());
+        codeEditor.SetShowWhitespaces(false);
+
+
+        static const char *fileToEdit = "/Users/kivicode/Documents/GitHub/NodeNet/src/NodeNet/templates/finish.node";
+
+        {
+            std::ifstream t(fileToEdit);
+            if (t.good()) {
+                std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+                codeEditor.SetText(str);
+            }
+        }
+        codeEditor.inited = true;
     }
 
     void generateCode() {
@@ -322,11 +352,13 @@ namespace graphics {
     }
 
     void NodeEditorShow() {
+        if (!codeEditor.inited) initCodeEditor();
         show_code_inspector();
         show_node_inspector();
         show_settings();
         show_configuration_settings();
         show_log();
+        show_code_editor();
         show_editor("Nodes", editor);
     }
 
