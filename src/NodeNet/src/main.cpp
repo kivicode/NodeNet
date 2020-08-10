@@ -7,6 +7,7 @@
 #include <SDL.h>
 #include <GL/gl3w.h>
 #include <dependencies/imgui-1.76/imgui_internal.h>
+#include <iostream>
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui_internal.h"
@@ -281,8 +282,8 @@ void setStyleDark() {
 
     colors[ImGuiCol_Text]                   = ImVec4(1.000f, 1.000f, 1.000f, 1.000f);
     colors[ImGuiCol_TextDisabled]           = ImVec4(0.500f, 0.500f, 0.500f, 1.000f);
-    colors[ImGuiCol_WindowBg]               = ImVec4(0.180f, 0.180f, 0.180f, 1.000f);
-    colors[ImGuiCol_ChildBg]                = ImVec4(0.280f, 0.280f, 0.280f, 0.000f);
+    colors[ImGuiCol_WindowBg]               = ImVec4(0.160f, 0.160f, 0.160f, 1.000f);
+    colors[ImGuiCol_ChildBg]                = ImVec4(0.247f, 0.247f, 0.247f, 0.000f);
     colors[ImGuiCol_PopupBg]                = ImVec4(0.313f, 0.313f, 0.313f, 1.000f);
     colors[ImGuiCol_Border]                 = ImVec4(0.266f, 0.266f, 0.266f, 1.000f);
     colors[ImGuiCol_BorderShadow]           = ImVec4(0.000f, 0.000f, 0.000f, 0.000f);
@@ -403,6 +404,7 @@ int main(int, char**)
 	imnodes::StyleColorsCustomDark();
 
 	ImGui::GetIO().Fonts->AddFontFromFileTTF("fonts/Roboto/Roboto-Regular.ttf", 16.0f);
+	graphics::NodeEditorLoadFonts();
 
 	bool done = false;
 	bool initialized = false;
@@ -442,12 +444,14 @@ int main(int, char**)
 		ImGui::NewFrame();
 
 
-        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize;
+
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar;
 
         ImGui::SetNextWindowPos(ImVec2(0, 0));
         ImGui::SetNextWindowSize(ImGui::GetWindowViewport()->GetWorkSize());
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::Begin("Dockspace", nullptr, window_flags);
+
         ImGui::PopStyleVar(1);
 
 
@@ -479,7 +483,41 @@ int main(int, char**)
             dockspaceBuilt = true;
         }
 
+        if(ImGui::BeginMenuBar()) {
+
+            if (ImGui::BeginMenu("File"))
+            {
+                if (ImGui::BeginMenu("New"))
+                {
+                    if (ImGui::MenuItem("New Project")) {}
+                    if (ImGui::MenuItem("New Node")) graphics::NewNode();
+                    ImGui::EndMenu();
+                }
+                if (ImGui::BeginMenu("Open...")) {
+                    if (ImGui::MenuItem("Open Project")) {}
+                    if (ImGui::MenuItem("Open Node")) graphics::EditNode();
+                    ImGui::EndMenu();
+                }
+                if (ImGui::MenuItem("Save")) {}
+                if (ImGui::MenuItem("Save As..")) {}
+                ImGui::Separator();
+                if (ImGui::BeginMenu("Recent Files"))
+                {
+                    // iterate items..
+                    // e.g. if (ImGui::Item("&1. filename.txt")) {}
+                    ImGui::EndMenu();
+                }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Quit", "CTRL+W")) {}
+                ImGui::EndMenu();
+            }
+
+            ImGui::EndMenuBar();
+        }
+
         ImGui::End();
+
+
         
 
 		if (!initialized)

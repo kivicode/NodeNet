@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef NODENET_TEXTEDIT_H
+#define NODENET_TEXTEDIT_H
 
 #include <string>
 #include <vector>
@@ -271,6 +271,7 @@ public:
     void Redo(int aSteps = 1);
 
     static const Palette& GetDarkPalette();
+    static const Palette& GetCustomDarkPalette();
     static const Palette& GetLightPalette();
     static const Palette& GetRetroBluePalette();
 
@@ -2399,6 +2400,34 @@ const TextEditor::Palette & TextEditor::GetDarkPalette()
     return p;
 }
 
+const TextEditor::Palette & TextEditor::GetCustomDarkPalette()
+{
+    const static Palette p = { {
+                                       0xffe0cfbe,  // Default
+                                       0xffd69c56,  // Keyword
+                                       0xffd6b68f,  // Number
+                                       0xff7070e0,  // String
+                                       0xff70a0e0,  // Char literal
+                                       0xffe0cfbe,  // Punctuation
+                                       0xff408080,  // Preprocessor
+                                       0xffe0cfbe,  // Identifier
+                                       0xff9bc64d,  // Known identifier
+                                       0xffc040a0,  // Preproc identifier
+                                       0xff206020, // Comment (single line)
+                                       0xff406020, // Comment (multi line)
+                                       0xff232928, // Background
+                                       0xffe0e0e0, // Cursor
+                                       0x80a06020, // Selection
+                                       0x800020ff, // ErrorMarker
+                                       0x40f08000, // Breakpoint
+                                       0xff666360, // Line number
+                                       0x401c1c1c, // Current line fill
+                                       0x40808080, // Current line fill (inactive)
+                                       0x40a0a0a0, // Current line edge
+                               } };
+    return p;
+}
+
 const TextEditor::Palette & TextEditor::GetLightPalette()
 {
     const static Palette p = { {
@@ -3540,33 +3569,39 @@ const TextEditor::LanguageDefinition& TextEditor::LanguageDefinition::NodeScript
     if (!inited)
     {
         static const char* const keywords[] = {
-                "\\@finish_node", "\\@start_node", "@custom_node", "INPUT_NAME", "input", "output"
+                "name", "type", "min_val", "max_val", "drag_speed", "options", "defualt_option",
+                "False", "None", "True", "and", "as", "assert", "break", "class", "continue",
+                "def", "del", "elif", "else", "except", "finally", "for", "from", "global",
+                "if", "import", "in", "is", "lambda", "nonlocal", "not", "or", "pass", "raise",
+                "return", "try", "while", "with", "yield", "print"
         };
 
         for (auto& k : keywords)
             langDef.mKeywords.insert(k);
 
         static const char* const identifiers[] = {
-                "name", "type", "min_val", "max_val", "drag_speed", "options", "defualt_option"
+                "INPUT_NAME", "input", "output"
         };
         for (auto& k : identifiers)
         {
             Identifier id;
-            id.mDeclaration = "Built-in function";
+//            id.mDeclaration = "Built-in function";
             langDef.mIdentifiers.insert(std::make_pair(std::string(k), id));
         }
 
-        langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, PaletteIndex>("L?\\\"(\\\\.|[^\\\"])*\\\"", PaletteIndex::String));
-        langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, PaletteIndex>("\\\'[^\\\']*\\\'", PaletteIndex::String));
+        langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, PaletteIndex>(R"(\"(\\.|[^\"])*\")", PaletteIndex::String));
+        langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, PaletteIndex>(R"(\'[^\']*\')", PaletteIndex::String));
         langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, PaletteIndex>("0[xX][0-9a-fA-F]+[uU]?[lL]?[lL]?", PaletteIndex::Number));
         langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, PaletteIndex>("[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)([eE][+-]?[0-9]+)?[fF]?", PaletteIndex::Number));
         langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, PaletteIndex>("[+-]?[0-9]+[Uu]?[lL]?[lL]?", PaletteIndex::Number));
+        langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, PaletteIndex>("<%|%>", PaletteIndex::PreprocIdentifier));
+        langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, PaletteIndex>("(@.*)", PaletteIndex::Preprocessor));
         langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, PaletteIndex>("[a-zA-Z_][a-zA-Z0-9_]*", PaletteIndex::Identifier));
-        langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, PaletteIndex>("[\\[\\]\\{\\}\\!\\%\\^\\&\\*\\(\\)\\-\\+\\=\\~\\|\\<\\>\\?\\/\\;\\,\\.]", PaletteIndex::Punctuation));
+        langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, PaletteIndex>(R"([\[\]\{\}\!\%\^\&\*\(\)\-\+\=\~\|\<\>\?\/\;\,\.])", PaletteIndex::Punctuation));
 
-        langDef.mCommentStart = "--[[";
-        langDef.mCommentEnd = "]]";
-        langDef.mSingleLineComment = "--";
+        langDef.mCommentStart = "/*";
+        langDef.mCommentEnd = "*/";
+        langDef.mSingleLineComment = "//";
 
         langDef.mCaseSensitive = true;
         langDef.mAutoIndentation = true;
@@ -3577,3 +3612,5 @@ const TextEditor::LanguageDefinition& TextEditor::LanguageDefinition::NodeScript
     }
     return langDef;
 }
+
+#endif

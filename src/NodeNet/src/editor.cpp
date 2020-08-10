@@ -30,9 +30,11 @@ namespace graphics {
 
     imnodes::EditorContext *context = nullptr;
 
+    ImFont* editorFont;
+
     std::string consoleLogString;
     std::string consoleCodeString;
-    char consoleInputBuff[1024] = {0};
+    char newNodePath[1024] = {0};
 
     Editor editor;
     TextEditor codeEditor;
@@ -155,8 +157,14 @@ namespace graphics {
 
     void show_code_editor() {
         ImGui::Begin("Code Editor");
-        codeEditor.Render("as");
-        codeEditor.Render("b");
+        ImGui::InputText("##hidelabel", newNodePath, 1024);
+        ImGui::SameLine();
+        if (ImGui::Button("Save")) {
+            writeFile(std::string(newNodePath), codeEditor.GetText());
+        }
+        ImGui::PushFont(editorFont);
+        codeEditor.Render("");
+        ImGui::PopFont();
         ImGui::End();
     }
 
@@ -164,7 +172,7 @@ namespace graphics {
         auto lang = TextEditor::LanguageDefinition::NodeScript();
 
         codeEditor.SetLanguageDefinition(lang);
-        codeEditor.SetPalette(TextEditor::GetDarkPalette());
+        codeEditor.SetPalette(TextEditor::GetCustomDarkPalette());
         codeEditor.SetShowWhitespaces(false);
 
 
@@ -341,6 +349,23 @@ namespace graphics {
             imnodes::SetNodeGridSpacePos(editor.nodes.at(i).id-1, editor.nodes.at(i).gridPosition);
         }
         fs.close();
+    }
+
+    void NewNode() {
+        ImGui::SetWindowFocus("Code Editor");
+        auto path = std::string(tinyfd_saveFileDialog("New Node", "unnamed.node", 0, {}, ""));
+        strcpy(newNodePath, path.c_str());
+    }
+
+    void EditNode() {
+        ImGui::SetWindowFocus("Code Editor");
+        auto path = std::string(tinyfd_openFileDialog("New Node", "", 0, {}, "", false));
+        strcpy(newNodePath, path.c_str());
+        codeEditor.SetText(readFile(path));
+    }
+
+    void NodeEditorLoadFonts() {
+        editorFont = ImGui::GetIO().Fonts->AddFontFromFileTTF("fonts/dejavu-sans-mono/DejaVuSansMono.ttf", 18);
     }
 
     void NodeEditorInitialize() {

@@ -69,4 +69,11 @@ std::string readFile(const std::string& path) {
     return output;
 }
 
+void writeFile(const std::string& path, const std::string& content) {
+    std::ofstream file;
+    file.open(path, std::ios::out | std::ios::trunc);
+    file << content;
+    file.close();
+}
+
 #endif //NODENET_UTILS_CPP
