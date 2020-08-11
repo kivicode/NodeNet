@@ -27,6 +27,8 @@ namespace graphics {
     void debug();
     void debug_save();
     void debug_load();
+    void spawnNode(const std::string& path);
+    void spawnNodeDragInstance(tinydir_file file, int& index);
 
     imnodes::EditorContext *context = nullptr;
 
@@ -34,7 +36,7 @@ namespace graphics {
 
     std::string consoleLogString;
     std::string consoleCodeString;
-    char newNodePath[1024] = {0};
+
 
     Editor editor;
     TextEditor codeEditor;
@@ -45,6 +47,8 @@ namespace graphics {
     DatasetManager dataset;
     CodeManager codeManager;
 
+    char newNodePath[1024] = {0};
+    tinydir_file selectedDragDropFile;
 
     bool draggingWasStarted = false;
     ImVec2 posWhenStartedDragging = ImVec2(0, 0);
@@ -64,14 +68,44 @@ namespace graphics {
         ImGui::End();
     }
 
+
+
     void show_node_inspector() {
         ImGui::Begin("Inspector");
 
-        ImGui::BeginChild("OuterRegion");
-        for (int i = 0; i < 40; ++i) {
-            ImGui::Text("Entry %i", i);
+        std::string favourites[] = {"Core/dense", "Core/flatten", "start", "finish"};
+
+        if (ImGui::CollapsingHeader("Favourites")) {
+
+            for (auto & favourite : favourites) {
+
+                tinydir_file tmp_file;
+                strcpy(tmp_file.path, (PREFABS_PATH + "/" + favourite + ".node").c_str());
+                strcpy(tmp_file.name, favourite.c_str());
+
+                int j = 0;
+                spawnNodeDragInstance(tmp_file, j);
+            }
         }
-        ImGui::EndChild();
+
+        ImGui::Separator();
+        if (ImGui::CollapsingHeader("Nodes")) {
+            int j = 0;
+            for (tinydir_file file : scanDir(PREFABS_PATH)) {
+
+                if (!file.is_dir) {
+                   spawnNodeDragInstance(file, j);
+
+                } else {
+                    if (ImGui::TreeNode(fnameToNodeName(file.name).c_str())) {
+                        for (tinydir_file _file : scanDir(file.path)) {
+                            spawnNodeDragInstance(_file, j);
+                        }
+                        ImGui::TreePop();
+                    }
+                }
+            }
+        }
 
 
         ImGui::End();
@@ -137,6 +171,7 @@ namespace graphics {
         ImGui::SameLine();
         if (ImGui::Button("Debug load")) debug_load();
 
+
         imnodes::BeginNodeEditor();
 
         graphics::updateLinks();
@@ -146,6 +181,15 @@ namespace graphics {
         } // update/redraw nodes
 
         imnodes::EndNodeEditor();
+        if (ImGui::BeginDragDropTarget())
+        {
+            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Node_DragDrop"))
+            {
+                console.log(std::string("Node from path: ") + std::string(selectedDragDropFile.path));
+                spawnNode(selectedDragDropFile.path);
+            }
+            ImGui::EndDragDropTarget();
+        }
 
         graphics::handleNewNodes();
         graphics::handleDragging();
@@ -157,14 +201,16 @@ namespace graphics {
 
     void show_code_editor() {
         ImGui::Begin("Code Editor");
-        ImGui::InputText("##hidelabel", newNodePath, 1024);
-        ImGui::SameLine();
-        if (ImGui::Button("Save")) {
-            writeFile(std::string(newNodePath), codeEditor.GetText());
+        if (ImGui::IsWindowFocused()) {
+            ImGui::InputText("##hidelabel", newNodePath, 1024);
+            ImGui::SameLine();
+            if (ImGui::Button("Save")) {
+                writeFile(std::string(newNodePath), codeEditor.GetText());
+            }
+            ImGui::PushFont(editorFont);
+            codeEditor.Render("");
+            ImGui::PopFont();
         }
-        ImGui::PushFont(editorFont);
-        codeEditor.Render("");
-        ImGui::PopFont();
         ImGui::End();
     }
 
@@ -174,7 +220,6 @@ namespace graphics {
         codeEditor.SetLanguageDefinition(lang);
         codeEditor.SetPalette(TextEditor::GetCustomDarkPalette());
         codeEditor.SetShowWhitespaces(false);
-
 
         static const char *fileToEdit = "/Users/kivicode/Documents/GitHub/NodeNet/src/NodeNet/templates/finish.node";
 
@@ -226,6 +271,19 @@ namespace graphics {
         #ifdef DEBUG
                 std::cout << "Create node: " << node_id << "\n";
         #endif
+    }
+
+    void spawnNodeDragInstance(tinydir_file _file, int& j) {
+        ImGui::Spacing(); ImGui::SameLine();
+        ImGui::Spacing(); ImGui::SameLine();
+        ImGui::Selectable(fnameToNodeName(_file.name).c_str(), false);
+        if (ImGui::BeginDragDropSource()) {
+            ImGui::Text(fnameToNodeName(_file.name).c_str(), j);
+            strcpy(selectedDragDropFile.path, _file.path);
+            ImGui::SetDragDropPayload("Node_DragDrop", &j, sizeof(int));
+            ImGui::EndDragDropSource();
+            j++;
+        }
     }
 
     void makeMenuItemAndSpawnNodeFromFile(tinydir_file file) {
@@ -284,13 +342,12 @@ namespace graphics {
         if (ImGui::BeginPopup("Spawn node")) {
 
             for (tinydir_file file : scanDir(PREFABS_PATH)) {
-                if (file.name[0] == '.') continue;
 
                 if (!file.is_dir) {
                     makeMenuItemAndSpawnNodeFromFile(file);
                 } else {
                     if (ImGui::BeginMenu(fnameToNodeName(file.name).c_str())){
-                        for (tinydir_file _file : scanDir(PREFABS_PATH)) {
+                        for (tinydir_file _file : scanDir(file.path)) {
                             makeMenuItemAndSpawnNodeFromFile(_file);
                         }
                         ImGui::EndMenu();

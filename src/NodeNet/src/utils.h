@@ -29,6 +29,8 @@
 
 #define GLOBAL_PIN_ID_TO_LOCAL(node, internalId) GET_INPUT_ID(node, node.inputs.size() + internalId)
 
+#define STR(x) std::to_string(x)
+
 template < typename T>
 std::pair<bool, int > findInVector(const std::vector<T>& vecOfElements, const T  & element);
 
@@ -65,13 +67,16 @@ void replaceAll(std::string& str, const std::string& from, const std::string& to
     }
 }
 
-std::vector<tinydir_file> scanDir(const std::string& path) {
+std::vector<tinydir_file> scanDir(const std::string& path, bool ignoreDots = true) {
     std::vector<tinydir_file> result = {};
+    std::string name;
     tinydir_dir dir;
     tinydir_open_sorted(&dir, path.c_str());
     for (int i = 0; i < dir.n_files; i++) {
         tinydir_file file;
         tinydir_readfile_n(&dir, &file, i);
+        name = file.name;
+        if (ignoreDots && name.at(0) == '.') continue;
         result.push_back(file);
     }
     tinydir_close(&dir);
@@ -85,5 +90,11 @@ std::string fnameToNodeName(std::string name) {
     return name;
 }
 
+
+int* shiftPtr(int *ptr, int shift) {
+    int *v;     // we don't know what type of data v will point to
+    v =  ptr + shift; // pointer arithmetic
+    return v;    // return the resulting memory address
+}
 
 #endif //NODENET_UTILS_H

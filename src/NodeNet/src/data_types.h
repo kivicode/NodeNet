@@ -20,10 +20,12 @@
 #include <cereal/types/vector.hpp>
 #include <cereal/types/map.hpp>
 
-
 class Node;
 class Link;
 class Editor;
+
+typedef std::vector<tinydir_file> NodeFiles;
+typedef std::vector<int*> PrefabNodesIndexes;
 
 struct CodeIODeclaration {
     std::string code;

@@ -1,0 +1,5 @@
+<%
+Flatten
+%>
+
+input("Name") = Flatten()(input("Link"))
