@@ -1450,7 +1450,7 @@ void TextEditor::Render()
         }
 
         // Draw a tooltip on known identifiers/preprocessor symbols
-        if (ImGui::IsMousePosValid())
+        if (ImGui::IsMousePosValid() && false)
         {
             auto id = GetWordAt(ScreenPosToCoordinates(ImGui::GetMousePos()));
             if (!id.empty())
@@ -2415,7 +2415,7 @@ const TextEditor::Palette & TextEditor::GetCustomDarkPalette()
                                        0xffc040a0,  // Preproc identifier
                                        0xff206020, // Comment (single line)
                                        0xff406020, // Comment (multi line)
-                                       0xff232928, // Background
+                                       0xff151515, // Background
                                        0xffe0e0e0, // Cursor
                                        0x80a06020, // Selection
                                        0x800020ff, // ErrorMarker

@@ -1,0 +1,7 @@
+<%
+Finish
+@finish_node
+%>
+
+input("Name") = Model(inputs={{INPUT_NAME}}, outputs=input("Link"))
+

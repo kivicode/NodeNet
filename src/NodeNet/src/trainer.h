@@ -12,9 +12,13 @@
 #include <cstdio>
 #include <string>
 #include "logger.h"
+#include "code_manager.h"
 
 class MlTrainer {
 public:
+
+    std::vector<std::string> availableOptimizers = {"SGD", "RMSprop", "Adam", "Adadelta", "Adagrad", "Adamax", "Nadam", "Ftrl"};
+    int selectedOptimizer = 0;
 
     std::string pythonPath = "/usr/local/bin/py";
     FILE* pipe;
@@ -23,7 +27,10 @@ public:
 
     MlTrainer(Logger* logTarget): logTarget(logTarget){}
 
-    bool train(const std::string& filePath) {
+    bool train(Editor& editor, CodeManager& codeManager, const std::string& filePath) {
+        codeManager.optimizer = availableOptimizers.at(selectedOptimizer);
+        codeManager.generateCode(editor);
+        codeManager.save();
         return this->start_exec(pythonPath + " " + filePath);
     }
 

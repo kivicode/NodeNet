@@ -15,6 +15,8 @@
 
 #define MAX_DATASET_PATH_LENGTH 1024
 
+#define MAX_SEARCH_LENGTH 512
+
 #define PREFABS_PATH std::string("/Users/kivicode/Documents/GitHub/NodeNet/src/NodeNet/templates")
 
 #define DEBUG

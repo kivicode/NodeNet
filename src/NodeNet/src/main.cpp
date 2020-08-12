@@ -138,6 +138,26 @@ void ImGui::EndGroupPanel()
     ImGui::EndGroup();
 }
 
+bool ImGui::ListBox(const char* label, int* currIndex, std::vector<std::string>& values) {
+    auto getter = [](void* vec, int idx, const char** out_text) {
+        auto& vector = *static_cast<std::vector<std::string>*>(vec);
+        if (idx < 0 || idx >= static_cast<int>(vector.size())) { return false; }
+        *out_text = vector.at(idx).c_str();
+        return true;
+    };
+    return ImGui::ListBox(label, currIndex, getter, static_cast<void*>(&values), values.size());
+}
+
+bool ImGui::Combo(const char* label, int* currIndex, std::vector<std::string>& values) {
+    auto getter = [](void* vec, int idx, const char** out_text) {
+        auto& vector = *static_cast<std::vector<std::string>*>(vec);
+        if (idx < 0 || idx >= static_cast<int>(vector.size())) { return false; }
+        *out_text = vector.at(idx).c_str();
+        return true;
+    };
+    return ImGui::Combo(label, currIndex, getter, static_cast<void*>(&values), values.size());
+}
+
 void setStyle() {
     ImGuiStyle &st = ImGui::GetStyle();
     st.FrameBorderSize = 1.0f;

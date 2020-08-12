@@ -24,8 +24,7 @@ class Node;
 class Link;
 class Editor;
 
-typedef std::vector<tinydir_file> NodeFiles;
-typedef std::vector<int*> PrefabNodesIndexes;
+typedef std::pair<std::string, tinydir_file> NodeMenuItem;
 
 struct CodeIODeclaration {
     std::string code;
@@ -233,7 +232,8 @@ public:
     std::vector<int> inputNodeIds  = {};
     std::vector<int> finishNodeIds = {};
 
-    int current_id = 0;
+    int current_node_id = 0;
+    int current_link_id = 0;
 
     std::vector<Link> getLinksFromNode(Node& node);
     std::vector<Link> getLinksToNode(Node& node);
@@ -253,7 +253,7 @@ public:
                 CEREAL_NVP(links),
                 CEREAL_NVP(inputNodeIds),
                 CEREAL_NVP(finishNodeIds),
-                CEREAL_NVP(current_id));
+                CEREAL_NVP(current_node_id));
     }
 };
 

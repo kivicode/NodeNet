@@ -25,6 +25,7 @@ public:
 
     char fileSavePath[1024] = {};
     std::vector<std::string> imports = {};
+    std::string optimizer = "";
 
     void addLib(std::string importStatement) {
         this->imports.push_back(importStatement);
@@ -65,7 +66,7 @@ private:
         this->code += "if __name__ == '__main__':\n";
         this->code += "\tmodel = generate_model()\n";
         this->code += "\tx_train, y_train, x_test, y_test = load_dataset()\n\n";
-        this->code += "\tmodel.compile(optimizer='sgd', loss='mse')\n\n";
+        this->code += std::string("\tmodel.compile(optimizer=\'") + optimizer + std::string("\', loss='mse')\n\n");
         this->code += "\tprint('[INFO ] Training started')\n";
         this->code += "\tmodel.fit(x_train, y_train, batch_size=32, epochs=10)\n";
         this->code += "\tprint('[INFO ] Training finished')\n\n";

@@ -90,11 +90,23 @@ std::string fnameToNodeName(std::string name) {
     return name;
 }
 
-
 int* shiftPtr(int *ptr, int shift) {
     int *v;     // we don't know what type of data v will point to
     v =  ptr + shift; // pointer arithmetic
     return v;    // return the resulting memory address
+}
+
+#include <algorithm>
+#include <string>
+#include <cctype>
+
+bool findStringIC(const std::string & strHaystack, const std::string & strNeedle) { //// Ignore case search
+    auto it = std::search(
+            strHaystack.begin(), strHaystack.end(),
+            strNeedle.begin(),   strNeedle.end(),
+            [](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2); }
+    );
+    return (it != strHaystack.end() );
 }
 
 #endif //NODENET_UTILS_H

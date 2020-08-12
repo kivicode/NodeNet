@@ -1,8 +1,0 @@
-<%
-Input
-@start_node
-input name=Name  type=string
-input name=Size type=int
-%>
-
-input("Name") = Input(shape=(input("Size"),))

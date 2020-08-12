@@ -1,0 +1,11 @@
+<%
+Input (2D)
+@start_node
+input name=Name   type=string
+input name=Width  type=int
+input name=Height type=int
+
+%>
+
+input("Name") = Input(shape=(input("Width"), input("Height")))
+

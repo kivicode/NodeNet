@@ -29,7 +29,7 @@ namespace NodeGenerator {
         imnodes::MarkNode(node.id, node.mark, node.markDescription);
 
         imnodes::BeginNodeTitleBar();
-        ImGui::TextUnformatted(config.title.c_str());
+        ImGui::TextUnformatted((config.title + " " + STR(node.id)).c_str());
         imnodes::EndNodeTitleBar();
 
         // Inputs

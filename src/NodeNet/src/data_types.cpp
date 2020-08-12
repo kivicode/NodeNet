@@ -93,6 +93,7 @@ int Node::inputIdByName(std::string& name) {
 
 std::any Node::getInputValueById(Editor &editor, int localIndex) {
     if (this->config.inputs[localIndex].name == LINK_PIN_TEXT) {
+        std::cout << this->id - 1 << std::endl;
         auto val = this->getPrevVarname(editor, editor.getLinkToPin(editor.nodes.at(this->id - 1), localIndex));
 #ifdef DEBUG
         std::cout << "Found staff pin: " << this->config.inputs[localIndex].name << " With val: " << val << " ID: " << this->inputIds[localIndex] << "\n";

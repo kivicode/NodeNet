@@ -1,8 +1,0 @@
-<%
-Finish
-@finish_node
-input name=Name  type=string
-input name=Units type=int_drag min_val=0 max_val=100 drag_speed=1
-%>
-
-input("Name") = Model(inputs={{INPUT_NAME}}, outputs=input("Link"))

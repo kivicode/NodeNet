@@ -79,6 +79,8 @@ Index of this file:
 // Helper Macros
 #ifndef IM_ASSERT
 #include <assert.h>
+#include <vector>
+
 #define IM_ASSERT(_EXPR)            assert(_EXPR)                               // You can override the default assert handler by editing imconfig.h
 #endif
 #if !defined(IMGUI_USE_STB_SPRINTF) && (defined(__clang__) || defined(__GNUC__))
@@ -821,6 +823,10 @@ namespace ImGui
 
     void BeginGroupPanel(const char *name, const ImVec2 &size);
     void EndGroupPanel();
+
+    IMGUI_API bool ListBox(const char* label, int* currIndex, std::vector<std::string>& values);
+
+    bool Combo(const char *label, int *currIndex, std::vector<std::string> &values);
 } // namespace ImGui
 
 //-----------------------------------------------------------------------------
