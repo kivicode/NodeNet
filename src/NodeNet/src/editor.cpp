@@ -9,6 +9,7 @@
 
 #include <imnodes.h>
 #include <imgui.h>
+#include <SDL_keycode.h>
 
 #include <algorithm>
 #include <dependencies/imgui-1.76/imgui_internal.h>
@@ -22,6 +23,7 @@ namespace graphics {
     void handleNewLinks();
     void handleNewNodes();
     void handleDragging();
+    void handleItemDeleting();
     void updateLinks();
     void drawNode(Node &node);
     void debug();
@@ -222,6 +224,7 @@ namespace graphics {
         graphics::handleDragging();
 
         graphics::handleNewLinks();
+        graphics::handleItemDeleting();
 
         ImGui::End();
     }
@@ -443,38 +446,39 @@ namespace graphics {
         imnodes::EditorContextResetPanning(ImVec2(cur.x - (ImGui::GetIO().MouseWheelH * speed), cur.y + (ImGui::GetIO().MouseWheel * speed)));
     }
 
+    void handleItemDeleting() {
+        if(ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) &&
+          (ImGui::IsKeyReleased(SDL_SCANCODE_BACKSPACE) || ImGui::IsKeyReleased(SDL_SCANCODE_DELETE))) {
+
+            int selectedNodeIds[imnodes::NumSelectedNodes()];
+            imnodes::GetSelectedNodes(selectedNodeIds);
+
+            for (int id : selectedNodeIds) {
+                auto iter = std::find_if(editor.nodes.begin(), editor.nodes.end(),
+                                         [id](const Node &node) -> bool { return node.id == id; });
+                if (iter == editor.nodes.end()) continue;
+                auto links = editor.getLinksOfNode(*iter);
+                for (Link &link : links) {
+                    auto link_iter = std::find_if(editor.links.begin(), editor.links.end(),
+                                                  [link](const Link &link_) -> bool { return link_.id == link.id; });
+                    if (link_iter != editor.links.end()) {
+                        editor.links.erase(link_iter);
+                    }
+                }
+            }
+
+            for (int id : selectedNodeIds) {
+                auto iter = std::find_if(editor.nodes.begin(), editor.nodes.end(),
+                                         [id](const Node &node) -> bool { return node.id == id; });
+                if (iter != editor.nodes.end()) {
+                    editor.nodes.erase(iter);
+                }
+            }
+        }
+    }
+
     void debug(){
-        int selectedNodeIds[imnodes::NumSelectedNodes()];
-        std::vector<int> vecIds;
 
-        imnodes::GetSelectedNodes(selectedNodeIds);
-        for (int id : selectedNodeIds) {
-//            auto links = editor.getLinksOfNode(editor.nodes.at(id-1));
-//            for (Link link : links) {
-//                editor.links.erase(editor.links.begin() + link.id - 1);
-//            }
-
-            vecIds.push_back(id - 1);
-            std::cout << "To delete:" << id-1 << "\n";
-        }
-
-        std::sort(vecIds.begin(), vecIds.end(), std::greater<>());
-
-        int j = 0;
-        for (auto & node : editor.nodes) {
-            node.id = ++j;
-        }
-        for (int id : vecIds) {
-            std::cout << "Cur id: " << (STR(id)) << "\n";
-
-//            for (int shiftId = id; shiftId < editor.nodes.size(); shiftId++) {
-//                editor.nodes.at(shiftId).id--;
-//                std::cout << "Shift: " << (STR(shiftId)) << "\n";
-//            }
-            editor.nodes.erase(editor.nodes.begin() + id);
-//
-        }
-        editor.current_node_id-=vecIds.size() - 1;
     }
 
     void debug_save() {
