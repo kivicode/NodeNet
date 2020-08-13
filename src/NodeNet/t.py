@@ -3,11 +3,12 @@ from keras.layers import *
 
 
 def generate_model():
-	i = Input(shape=(0,))
-	i = Dense(0, activation="relu")(i)
-	i = Model(inputs=i, outputs=i)
+	i = Input(shape=(2,))
+	h1 = Dense(2, activation="relu")(i)
+	h2 = Dense(1, activation="softmax")(h1)
+	f = Model(inputs=i, outputs=h2)
 
-	return i
+	return f
 
 def load_dataset():
 	return np.array([[0,0], [0,1], [1,1]]), np.array([0, 1, 0]), [], []

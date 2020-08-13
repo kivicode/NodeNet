@@ -315,13 +315,13 @@ namespace graphics {
     }
 
     void spawnNode(const std::string& path) {
-        const int node_id = ++editor.current_node_id;
+        const int node_id = editor.current_node_id++;
         imnodes::SetNodeScreenSpacePos(node_id, ImGui::GetMousePos());
         Node node = Node(node_id, 0.f);
         editor.nodes.push_back(node);
         editor.inputNodeIds.push_back(node.id);
         NodeGenerator::buildNode(editor.nodes[editor.nodes.size() - 1], path);
-        if (editor.nodes[editor.nodes.size() - 1]._type == FINISH) editor.finishNodeIds.push_back(node.id - 1);
+        if (editor.nodes[editor.nodes.size() - 1]._type == FINISH) editor.finishNodeIds.push_back(node.id);
         #ifdef DEBUG
                 std::cout << "Create node: " << node_id << "\n";
         #endif
@@ -391,7 +391,6 @@ namespace graphics {
         }
 
         if (ImGui::BeginPopup("Spawn node")) {
-            float f = 0;
             if(!ImGui::IsAnyItemActive()) ImGui::SetKeyboardFocusHere(0);
             bool entered = ImGui::InputTextWithHint("##hidelabel", "Type to search", newNodeSearch, MAX_SEARCH_LENGTH, ImGuiInputTextFlags_EnterReturnsTrue);
 
@@ -463,6 +462,12 @@ namespace graphics {
                 auto iter = std::find_if(editor.nodes.begin(), editor.nodes.end(),
                                          [id](const Node &node) -> bool { return node.id == id; });
                 if (iter == editor.nodes.end()) continue;
+                if (iter->_type == PrivatePinType::FINISH) {
+                    int target_id = iter->id;
+                    auto finish_iter = std::find_if(editor.finishNodeIds.begin(), editor.finishNodeIds.end(),
+                                             [target_id](const int &f_id) -> bool { return f_id == target_id; });
+                    if (finish_iter != editor.finishNodeIds.end()) editor.finishNodeIds.erase(finish_iter);
+                }
                 auto links = editor.getLinksOfNode(*iter);
                 for (Link &link : links) {
                     auto link_iter = std::find_if(editor.links.begin(), editor.links.end(),
@@ -500,8 +505,8 @@ namespace graphics {
         std::ofstream os;
         os.open("out.cereal", std::ios::out | std::ios::binary);
         cereal::BinaryOutputArchive archive(os);
-        for(int i = 0; i < editor.nodes.size(); i++) {
-            editor.nodes.at(i).gridPosition = imnodes::GetNodeGridSpacePos(editor.nodes.at(i).id-1);
+        for(auto & node : editor.nodes) {
+            node.gridPosition = imnodes::GetNodeGridSpacePos(node.id);
         }
         archive(editor);
         os.close();
@@ -513,8 +518,8 @@ namespace graphics {
         fs.open("out.cereal", std::ios::in | std::ios::binary);
         cereal::BinaryInputArchive archive(fs);
         archive(editor);
-        for(int i = 0; i < editor.nodes.size(); i++) {
-            imnodes::SetNodeGridSpacePos(editor.nodes.at(i).id-1, editor.nodes.at(i).gridPosition);
+        for(auto & node : editor.nodes) {
+            imnodes::SetNodeGridSpacePos(node.id, node.gridPosition);
         }
         fs.close();
     }

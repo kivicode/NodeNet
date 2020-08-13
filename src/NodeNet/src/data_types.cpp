@@ -93,8 +93,8 @@ int Node::inputIdByName(std::string& name) {
 
 std::any Node::getInputValueById(Editor &editor, int localIndex) {
     if (this->config.inputs[localIndex].name == LINK_PIN_TEXT) {
-        std::cout << this->id - 1 << std::endl;
-        auto val = this->getPrevVarname(editor, editor.getLinkToPin(editor.nodes.at(this->id - 1), localIndex));
+        std::cout << this->id << std::endl;
+        auto val = Node::getPrevVarname(editor, editor.getLinkToPin(*this, localIndex));
 #ifdef DEBUG
         std::cout << "Found staff pin: " << this->config.inputs[localIndex].name << " With val: " << val << " ID: " << this->inputIds[localIndex] << "\n";
 #endif
@@ -251,7 +251,7 @@ std::string Node::getInputName(Editor &editor) {
     int n = 0;
     while(true) {
 
-        auto linkSearch = editor.getLinkToPin(editor.nodes.at(this->id-1), 0);
+        auto linkSearch = editor.getLinkToPin(*this, 0);
         if (linkSearch.second) {
             auto nodeSearch = editor.getNodeThatHasPinById(linkSearch.first.start_attr);
             if (nodeSearch.second) {
@@ -269,7 +269,9 @@ bool Node::hasName(Editor& editor) {
     if (this->_type == START) {
         nameId = this->inputIds[0];
     } else {
-//        std::cout << this->_type << " -===- " << FINISH << "\n";
+        std::cout << "INP_TITLE: " << this->config.title << "\n";
+        std::cout << "INP_SIZE: "  << this->inputIds.size() << "\n";
+        std::cout << "INP_ID: "    << this->_type << ", " << START << ", " << CUSTOM << ", " << FINISH << "\n";
         nameId = this->inputIds[1];
     }
     return !std::string(this->inputs[nameId].s).empty() || editor.pinHasLink(nameId);
@@ -309,7 +311,7 @@ std::string Node::generateProcessedCode(Editor &editor, int indentation) {
 
     if (this->_type == START) this->processedCode.insert(0, indentation_string);
 
-    auto linkSearch = editor.getLinkToPin(editor.nodes.at(this->id-1), 0);
+    auto linkSearch = editor.getLinkToPin(*this, 0);
     if (linkSearch.second) {
         auto nodeSearch = editor.getNodeThatHasPinById(linkSearch.first.start_attr);
         if (nodeSearch.second) {
@@ -446,4 +448,12 @@ bool Editor::pinHasLink(int pinId) {
         if (link.start_attr == pinId || link.end_attr == pinId) return true;
     }
     return false;
+}
+
+Node Editor::nodeById(int id) {
+    auto iter = std::find_if(this->nodes.begin(), this->nodes.end(),
+                             [id](const Node &node) -> bool { return node.id == id; });
+    Node outp = *iter;
+    if (iter == this->nodes.end()) outp._type = NULL_NODE;
+    return outp;
 }

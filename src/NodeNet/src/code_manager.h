@@ -36,10 +36,13 @@ public:
         this->generateHeader();
         this->code += "\n\ndef generate_model():\n";
         for (int i : editor.finishNodeIds) {
-            auto _code = editor.nodes[i].generateProcessedCode(editor, indentation);
+            std::cout << "Try gen: " << i << "\n";
+            Node node = editor.nodeById(i);
+            if (node._type == NULL_NODE) continue;
+            auto _code = node.generateProcessedCode(editor, indentation);
             this->code += _code;
             this->code += "\n" + generateIndentation(indentation) + "return ";
-            this->code += std::string(std::any_cast<char*>(editor.nodes[i].getInputValueById(editor, 1)));
+            this->code += std::string(std::any_cast<char*>(editor.nodeById(i).getInputValueById(editor, 1)));
         }
         this->code += "\n\n";
         this->generateDatasetLoader();

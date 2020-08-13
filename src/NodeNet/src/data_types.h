@@ -57,7 +57,8 @@ enum SliderDataType : int {
 enum PrivatePinType : int{
     CUSTOM,
     FINISH,
-    START
+    START,
+    NULL_NODE
 };
 
 template<class Archive>
@@ -238,6 +239,8 @@ public:
     std::vector<Link> getLinksFromNode(Node& node);
     std::vector<Link> getLinksToNode(Node& node);
     std::vector<Link> getLinksOfNode(Node& node);
+
+    Node nodeById(int id);
 
     std::pair<Link, bool> getLinkToPin(Node& node, int localPinId);
 
