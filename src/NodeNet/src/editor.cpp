@@ -29,6 +29,7 @@ namespace graphics {
     void debug();
     void debug_save();
     void debug_load();
+    void open_code_preview();
     void spawnNode(const std::string& path);
     void spawnNodeDragInstance(tinydir_file _file, int &j, bool starable);
 
@@ -41,7 +42,7 @@ namespace graphics {
 
 
     Editor editor;
-    TextEditor codeEditor;
+    TextEditor codeEditor, codePreview;
     Logger console(&consoleLogString);
     Logger codeConsole(&consoleCodeString);
 
@@ -55,6 +56,8 @@ namespace graphics {
     char newNodeSearch[MAX_SEARCH_LENGTH] = {0};
 
     int selectedImportStatement = -1;
+
+    bool codePreviewOpen = false;
 
     bool draggingWasStarted = false;
     ImVec2 posWhenStartedDragging = ImVec2(0, 0);
@@ -196,6 +199,8 @@ namespace graphics {
         ImGui::SameLine();
         if (ImGui::Button("Train")) train();
         ImGui::SameLine();
+        if (ImGui::Button("Preview Code")) open_code_preview();
+        ImGui::SameLine();
         if (ImGui::Button("Debug")) debug();
         ImGui::SameLine();
         if (ImGui::Button("Debug save")) debug_save();
@@ -231,7 +236,6 @@ namespace graphics {
 
     void show_code_editor() {
         ImGui::Begin("Code Editor");
-//        if (ImGui::IsWindowFocused()) {
             ImGui::InputText("##hidelabel", newNodePath, 1024);
             ImGui::SameLine();
             if (ImGui::Button("Save")) {
@@ -248,6 +252,16 @@ namespace graphics {
             }
             ImGui::PopFont();
         ImGui::End();
+
+        if (codePreviewOpen) {
+            ImGui::Begin("Code Preview");
+            ImGui::PushItemWidth(-1);
+            if (ImGui::Button("Close")) codePreviewOpen = false;
+            ImGui::PushFont(editorFont);
+            codePreview.Render("Code Preview");
+            ImGui::PopFont();
+            ImGui::End();
+        }
     }
 
     void initCodeEditor() {
@@ -256,17 +270,13 @@ namespace graphics {
         codeEditor.SetLanguageDefinition(lang);
         codeEditor.SetPalette(TextEditor::GetCustomDarkPalette());
         codeEditor.SetShowWhitespaces(false);
-
-        static const char *fileToEdit = "/Users/kivicode/Documents/GitHub/NodeNet/src/NodeNet/templates/finish.node";
-
-        {
-            std::ifstream t(fileToEdit);
-            if (t.good()) {
-                std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-                codeEditor.SetText(str);
-            }
-        }
         codeEditor.inited = true;
+
+        codePreview.SetLanguageDefinition(lang);
+        codePreview.SetPalette(TextEditor::GetCustomDarkPalette());
+        codePreview.SetShowWhitespaces(false);
+        codePreview.inited = true;
+
     }
 
     void generateCode() {
@@ -277,7 +287,14 @@ namespace graphics {
             codeManager.generateCode(editor);
             codeManager.save();
         } catch (NodeException& exception) {
-            console.log("Unnamed node: " + editor.nodes[exception.nodeId-1].config.title, LogLevel::ERR);
+            int id = exception.nodeId;
+            auto iter = std::find_if(editor.nodes.begin(), editor.nodes.end(),
+                                     [id](const Node &node) -> bool { return node.id == id; });
+            if (iter == editor.nodes.end()) return;
+            auto mark = iter->mark;
+            if (mark == imnodes::NodeMarks::Red) {
+                console.log("Unnamed node: " + editor.nodes[exception.nodeId - 1].config.title, LogLevel::ERR);
+            }
             return;
         }
 //        console.log("Code generated:\n" + codeManager.getCode());
@@ -349,17 +366,6 @@ namespace graphics {
             editor.links.push_back(link);
         }
 
-        {
-            int link_id;
-            if (imnodes::IsLinkDestroyed(&link_id)) {
-                auto iter = std::find_if(
-                        editor.links.begin(), editor.links.end(), [link_id](const Link &link) -> bool {
-                            return link.id == link_id;
-                        });
-                assert(iter != editor.links.end());
-                editor.links.erase(iter);
-            }
-        }
     }
 
     void handleNewNodes() {
@@ -477,6 +483,15 @@ namespace graphics {
         }
     }
 
+    void open_code_preview() {
+        ImGui::SetNextWindowSize(ImVec2(1080, 320));
+        ImGui::Begin("Code Preview");
+        ImGui::End();
+        codePreviewOpen = true;
+        generateCode();
+        codePreview.SetText(codeManager.getCode());
+    }
+
     void debug(){
 
     }
@@ -538,6 +553,7 @@ namespace graphics {
         show_log();
         show_code_editor();
         show_editor("Nodes", editor);
+//        debug();
     }
 
     void NodeEditorShutdown() {
