@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <dependencies/imgui-1.76/imgui_internal.h>
 #include "TextEditor.h"
+#include "include/implot/implot.cpp"
 
 
 namespace fs = std::filesystem;
@@ -79,10 +80,8 @@ namespace graphics {
         ImGui::End();
     }
 
-
-
-    void show_node_inspector() {
-        ImGui::Begin("Inspector");
+    void show_node_panel() {
+        ImGui::Begin("Node Tree");
 
         std::string favourites[] = {"Core/dense", "Core/flatten"};
 
@@ -116,6 +115,28 @@ namespace graphics {
             }
         }
 
+
+        ImGui::End();
+    }
+
+
+
+    void show_node_inspector() {
+        ImGui::Begin("Inspector");
+
+        if (imnodes::NumSelectedNodes() == 1) {
+            int ids[1];
+            imnodes::GetSelectedNodes(ids);
+            Node& node = editor.nodeById(ids[0]);
+
+            ImGui::InputText("Title", node.config.title.data(), 1024);
+
+            if (ImGui::TreeNode("Edit header color")) {
+                ImGui::ColorPicker3("##hidelabel", node.config.headColor);
+                ImGui::TreePop();
+            }
+            std::cout << node.config.headColor[0] << ", " << node.config.headColor[1] << ", " << node.config.headColor[2] << "\n";
+        }
 
         ImGui::End();
     }
@@ -264,6 +285,22 @@ namespace graphics {
         }
     }
 
+    void show_plot() {
+        ImGui::Begin("Plot");
+
+        if(ImPlot::BeginPlot("Training")) {
+            std::vector<ImPlotPoint> vals = {};
+            std::vector<float> xx = {};
+            for(float i = 0; i < 10; i+=0.1) {
+                vals.push_back({i, exp(i)});
+            }
+            ImPlot::PlotLine("loss", vals.data(), vals.size());
+            ImPlot::PlotLine("acc", vals.data(), vals.size());
+            ImPlot::EndPlot();
+        }
+        ImGui::End();
+    }
+
     void initCodeEditor() {
         auto lang = TextEditor::LanguageDefinition::NodeScript();
 
@@ -293,7 +330,8 @@ namespace graphics {
             if (iter == editor.nodes.end()) return;
             auto mark = iter->mark;
             if (mark == imnodes::NodeMarks::Red) {
-                console.log("Unnamed node: " + editor.nodes[exception.nodeId - 1].config.title, LogLevel::ERR);
+                console.log("Unnamed node: " + iter->config.title, LogLevel::ERR);
+                tinyfd_messageBox("Code generation error", ("Unnamed node: " + iter->config.title).c_str(), "ok", "info", 0);
             }
             return;
         }
@@ -411,7 +449,6 @@ namespace graphics {
                 NodeMenuItem firstFound;
                 bool wasFound = false;
                 for (auto &node : menuNodes) {
-                    std::cout << node.first << "\n";
                     if (findStringIC(node.first, newNodeSearch)) {
                         if (!wasFound) {
                             wasFound = true;
@@ -538,7 +575,11 @@ namespace graphics {
     }
 
     void NodeEditorLoadFonts() {
-        editorFont = ImGui::GetIO().Fonts->AddFontFromFileTTF("fonts/dejavu-sans-mono/DejaVuSansMono.ttf", 18);
+        font_manager::fonts.editorFont = ImGui::GetIO().Fonts->AddFontFromFileTTF("fonts/Roboto/Roboto-Regular.ttf",             16.0f);
+        font_manager::fonts.headerFont = ImGui::GetIO().Fonts->AddFontFromFileTTF("fonts/Inter/static/Inter-Bold-slnt=0.ttf",    16.0f);
+        font_manager::fonts.bodyFont   = ImGui::GetIO().Fonts->AddFontFromFileTTF("fonts/Inter/static/Inter-Regular-slnt=0.ttf", 16.0f);
+
+        editorFont = ImGui::GetIO().Fonts->AddFontFromFileTTF("/Users/kivicode/Documents/GitHub/NodeNet/src/NodeNet/fonts/dejavu-sans-mono/DejaVuSansMono.ttf", 18);
     }
 
     void NodeEditorInitialize() {
@@ -552,12 +593,15 @@ namespace graphics {
     void NodeEditorShow() {
         if (!codeEditor.inited) initCodeEditor();
         show_code_inspector();
+        show_node_panel();
         show_node_inspector();
         show_settings();
         show_configuration_settings();
         show_log();
         show_code_editor();
+        show_plot();
         show_editor("Nodes", editor);
+
 //        debug();
     }
 

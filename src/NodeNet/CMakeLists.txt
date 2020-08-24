@@ -9,6 +9,9 @@ include_directories(NodeNet ${SDL2_INCLUDE_DIRS})
 
 set(CMAKE_CXX_FLAGS "-F/Library/Frameworks -framework SDL2 -framework CoreFoundation -stdlib=libc++")
 
+#find_package(implot)
+
+
 include_directories(.)
 include_directories(bin)
 include_directories(build)
@@ -74,6 +77,6 @@ add_executable(NodeNet
         src/code_manager.h
         src/logger.h
         src/exceptions.h
-        src/serializerTest.h)
+        src/serializerTest.h src/fonts.h)
 
 target_link_libraries(NodeNet ${SDL2_LIBRARIES})

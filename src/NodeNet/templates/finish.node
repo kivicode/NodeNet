@@ -1,7 +1,10 @@
 <%
 Finish
 @finish_node
+@color(59, 178, 115) //green
 %>
 
 input("Name") = Model(inputs={{INPUT_NAME}}, outputs=input("Link"))
+
+
 

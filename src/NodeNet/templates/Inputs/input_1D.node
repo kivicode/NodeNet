@@ -1,9 +1,11 @@
 <%
 Input (1D)
 @start_node
+@color(225, 85, 84)
 input name=Name   type=string
 input name=Size  type=int
 %>
 
 input("Name") = Input(shape=(input("Size"),))
+
 

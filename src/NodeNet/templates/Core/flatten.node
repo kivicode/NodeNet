@@ -1,5 +1,6 @@
 <%
 Flatten
+@color(0, 122, 216)
 %>
 
 input("Name") = Flatten()(input("Link"))

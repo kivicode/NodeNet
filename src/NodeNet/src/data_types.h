@@ -21,7 +21,9 @@
 #include <cereal/types/map.hpp>
 
 class Node;
+
 class Link;
+
 class Editor;
 
 typedef std::pair<std::string, tinydir_file> NodeMenuItem;
@@ -33,9 +35,9 @@ struct CodeIODeclaration {
     std::vector<int> startPoses;
     std::vector<int> endPoses;
 
-    CodeIODeclaration(std::string code): code(std::move(code)){}
+    CodeIODeclaration(std::string code) : code(std::move(code)) {}
 
-    void add(int lineNumber, int startPos, int endPos, std::string name="") {
+    void add(int lineNumber, int startPos, int endPos, std::string name = "") {
         this->lineNumbers.push_back(lineNumber);
         this->startPoses.push_back(startPos);
         this->endPoses.push_back(endPos);
@@ -54,7 +56,7 @@ enum SliderDataType : int {
     CODE
 };
 
-enum PrivatePinType : int{
+enum PrivatePinType : int {
     CUSTOM,
     FINISH,
     START,
@@ -62,7 +64,7 @@ enum PrivatePinType : int{
 };
 
 template<class Archive>
-void serialize(Archive & archive, ImVec2& vec) {
+void serialize(Archive &archive, ImVec2 &vec) {
     archive(vec.x, vec.y);
 }
 
@@ -85,6 +87,7 @@ public:
     bool isInput = false;
 
     NodeIOPin() = default;
+
     NodeIOPin(std::string name, bool isEditable);
 
     NodeIOPin(std::string name, bool isEditable, SliderDataType dataType);
@@ -93,17 +96,22 @@ public:
 
     NodeIOPin(std::string name, bool isEditable, float minSliderVal, float maxSliderVal, float sliderSpeed);
 
-    NodeIOPin(std::string name, bool isEditable, SliderDataType dataType, float minSliderVal, float maxSliderVal, float sliderSpeed);
+    NodeIOPin(std::string name, bool isEditable, SliderDataType dataType, float minSliderVal, float maxSliderVal,
+              float sliderSpeed);
 
     template<class Archive>
-    void serialize( Archive &archive ) {
-        archive(CEREAL_NVP(name), CEREAL_NVP(isEditable), CEREAL_NVP(static_cast<int>(dataType)), CEREAL_NVP(minSliderVal), CEREAL_NVP(maxSliderVal), CEREAL_NVP(sliderSpeed), CEREAL_NVP(options), CEREAL_NVP(selectedOption), CEREAL_NVP(isStaff));
+    void serialize(Archive &archive) {
+        archive(CEREAL_NVP(name), CEREAL_NVP(isEditable), CEREAL_NVP(static_cast<int>(dataType)),
+                CEREAL_NVP(minSliderVal), CEREAL_NVP(maxSliderVal), CEREAL_NVP(sliderSpeed), CEREAL_NVP(options),
+                CEREAL_NVP(selectedOption), CEREAL_NVP(isStaff));
     }
 
 };
 
 class NodeConfig {
 public:
+    float headColor[3] = {0/255.f, 108/255.f, 187/255.f};
+
     std::string title = "";
     PrivatePinType type = CUSTOM;
 
@@ -119,7 +127,7 @@ public:
     void setCode(std::string newCode);
 
     template<class Archive>
-    void serialize( Archive &archive ) {
+    void serialize(Archive &archive) {
         archive(CEREAL_NVP(title), CEREAL_NVP(inputs), CEREAL_NVP(baseCode));
     }
 };
@@ -142,7 +150,7 @@ struct IOData {
     }
 
     template<class Archive>
-    void serialize( Archive &archive ) {
+    void serialize(Archive &archive) {
         archive(CEREAL_NVP(s), CEREAL_NVP(f), CEREAL_NVP(i));
     }
 };
@@ -165,28 +173,34 @@ public:
     imnodes::NodeMarks mark = imnodes::NodeMarks::None;
     std::string markDescription = "";
 
-    std::vector<int>  inputIds = {};
+    std::vector<int> inputIds = {};
     std::vector<int> outputIds = {};
 
-    std::map<int, IOData>  inputs = {};
+    std::map<int, IOData> inputs = {};
     std::map<int, IOData> outputs = {};
 
     Node() = default;
+
     Node(int i, float v);
 
     [[nodiscard]] std::pair<int, bool> globalPinIdToLocal(int globalId) const;
 
     void setBaseCode(std::string code);
+
     void setConfig(NodeConfig newConfig);
+
     std::string generateProcessedCode(Editor &editor, int indentation);
+
     void init();
+
     NodeException checkExceptions(Editor &editor);
 
-    int inputIdByName(std::string& name);
+    int inputIdByName(std::string &name);
+
     std::any getInputValueById(Editor &editor, int localIndex);
 
     template<class Archive>
-    void serialize( Archive &archive ) {
+    void serialize(Archive &archive) {
         archive(CEREAL_NVP(gridPosition),
                 CEREAL_NVP(config),
                 CEREAL_NVP(baseCode), CEREAL_NVP(processedCode),
@@ -197,11 +211,17 @@ public:
 
 private:
     std::string getInputName(Editor &editor);
+
     void setProcessedCode(std::string code);
+
     void replaceInputsWithValues(Editor &editor);
+
     void deleteOutputsFromCode();
+
     static std::string getPrevVarname(Editor &editor, std::pair<Link, bool> link);
+
     bool hasName(Editor &editor);
+
     bool hasLink(Editor &editor);
 };
 
@@ -213,10 +233,11 @@ public:
     void sort(std::vector<Node> nodes);
 
     Link();
+
     Link(int i, int start, int end);
 
     template<class Archive>
-    void serialize( Archive &archive ) {
+    void serialize(Archive &archive) {
         archive(CEREAL_NVP(id),
                 CEREAL_NVP(start_attr),
                 CEREAL_NVP(end_attr));
@@ -230,28 +251,31 @@ public:
     std::vector<Node> nodes;
     std::vector<Link> links;
 
-    std::vector<int> inputNodeIds  = {};
+    std::vector<int> inputNodeIds = {};
     std::vector<int> finishNodeIds = {};
 
     int current_node_id = 0;
     int current_link_id = 0;
 
-    std::vector<Link> getLinksFromNode(Node& node);
-    std::vector<Link> getLinksToNode(Node& node);
-    std::vector<Link> getLinksOfNode(Node& node);
+    std::vector<Link> getLinksFromNode(Node &node);
 
-    Node nodeById(int id);
+    std::vector<Link> getLinksToNode(Node &node);
 
-    std::pair<Link, bool> getLinkToPin(Node& node, int localPinId);
+    std::vector<Link> getLinksOfNode(Node &node);
+
+    Node &nodeById(int id);
+
+    std::pair<Link, bool> getLinkToPin(Node &node, int localPinId);
 
     bool pinHasLink(int pinId);
 
-    std::pair<Node&, bool> getNodeThatHasPinById(int id);
+    std::pair<Node &, bool> getNodeThatHasPinById(int id);
 
-    std::pair<PinLocation, bool> getNextPinLocation(Node& node, int localPinId); // returns: {{parent node id, local pin id}, was found?}
+    std::pair<PinLocation, bool>
+    getNextPinLocation(Node &node, int localPinId); // returns: {{parent node id, local pin id}, was found?}
 
     template<class Archive>
-    void serialize( Archive &archive ) {
+    void serialize(Archive &archive) {
         archive(CEREAL_NVP(nodes),
                 CEREAL_NVP(links),
                 CEREAL_NVP(inputNodeIds),

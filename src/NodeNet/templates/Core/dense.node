@@ -1,5 +1,6 @@
 <%
 Dense
+@color(0, 122, 216)
 input name=Units type=int
 input name=Activation type=string_list options={relu,softmax}
 %>

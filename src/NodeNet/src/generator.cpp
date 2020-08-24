@@ -14,6 +14,7 @@
 #include "utils.h"
 #include <any>
 #include "exceptions.h"
+#include "fonts.h"
 
 
 
@@ -22,15 +23,23 @@ namespace NodeGenerator {
     int uniquePinIdCounter = 1;
 
     void generateFromConfig(Editor& editor, Node& node, NodeConfig& config) {
+        imnodes::PushColorStyle(imnodes::ColorStyle_TitleBar,        IM_COL32(config.headColor[0] * 255,       config.headColor[1] * 255,       config.headColor[2] * 255,       255));
+        imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarHovered, IM_COL32(config.headColor[0] * 255,       config.headColor[1] * 255,       config.headColor[2] * 255,       255));
+        imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarSelected,IM_COL32(config.headColor[0] * 255,       config.headColor[1] * 255,       config.headColor[2] * 255,       255));
 
         imnodes::BeginNode(node.id);
 
         NodeException ex = node.checkExceptions(editor);
         imnodes::MarkNode(node.id, node.mark, node.markDescription);
 
+        ImGui::PushFont(font_manager::fonts.headerFont);
         imnodes::BeginNodeTitleBar();
-        ImGui::TextUnformatted((config.title + " " + STR(node.id)).c_str());
+        ImGui::TextUnformatted(config.title.c_str());
         imnodes::EndNodeTitleBar();
+        ImGui::PopFont();
+
+        ImGui::PushFont(font_manager::fonts.bodyFont);
+
 
         // Inputs
         {
@@ -115,6 +124,10 @@ namespace NodeGenerator {
         }
 
         imnodes::EndNode();
+        imnodes::PopColorStyle();
+        imnodes::PopColorStyle();
+        imnodes::PopColorStyle();
+        ImGui::PopFont();
     }
 
     void buildTestNode(Node &node, const std::string &path) {

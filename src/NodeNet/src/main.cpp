@@ -7,12 +7,8 @@
 #include <SDL.h>
 #include <GL/gl3w.h>
 #include <dependencies/imgui-1.76/imgui_internal.h>
-#include <iostream>
-
-#define IMGUI_DEFINE_MATH_OPERATORS
-#include "imgui_internal.h"
-
-//ImVec2 ImGui::ImVec
+#include "fonts.h"
+#include "include/implot/implot.h"
 
 static ImVector<ImRect> s_GroupPanelLabelStack;
 
@@ -362,6 +358,76 @@ void setStyleDark() {
     style->TabRounding = 0.0f;
     style->WindowRounding = 4.0f;
 }
+void setStyleDarkUI() {
+    ImGuiStyle* style = &ImGui::GetStyle();
+    ImVec4* colors = style->Colors;
+
+    colors[ImGuiCol_Text]                   = ImVec4(1.000f, 1.000f, 1.000f, 1.000f);
+    colors[ImGuiCol_TextDisabled]           = ImVec4(0.500f, 0.500f, 0.500f, 1.000f);
+    colors[ImGuiCol_WindowBg]               = ImVec4(0.129f, 0.129f, 0.129f, 1.000f);
+    colors[ImGuiCol_ChildBg]                = ImVec4(0.247f, 0.247f, 0.247f, 0.000f);
+    colors[ImGuiCol_PopupBg]                = ImVec4(0.219f, 0.219f, 0.219f, 1.000f);
+    colors[ImGuiCol_Border]                 = ImVec4(0.266f, 0.266f, 0.266f, 1.000f);
+    colors[ImGuiCol_BorderShadow]           = ImVec4(0.000f, 0.000f, 0.000f, 0.000f);
+    colors[ImGuiCol_FrameBg]                = ImVec4(0.129f, 0.129f, 0.129f, 1.000f);
+    colors[ImGuiCol_FrameBgHovered]         = ImVec4(0.200f, 0.200f, 0.200f, 1.000f);
+    colors[ImGuiCol_FrameBgActive]          = ImVec4(0.280f, 0.280f, 0.280f, 1.000f);
+    colors[ImGuiCol_TitleBg]                = ImVec4(0.148f, 0.148f, 0.148f, 1.000f);
+    colors[ImGuiCol_TitleBgActive]          = ImVec4(0.148f, 0.148f, 0.148f, 1.000f);
+    colors[ImGuiCol_TitleBgCollapsed]       = ImVec4(0.148f, 0.148f, 0.148f, 1.000f);
+    colors[ImGuiCol_MenuBarBg]              = ImVec4(0.180f, 0.180f, 0.180f, 1.000f);
+    colors[ImGuiCol_ScrollbarBg]            = ImVec4(0.160f, 0.160f, 0.160f, 1.000f);
+    colors[ImGuiCol_ScrollbarGrab]          = ImVec4(0.277f, 0.277f, 0.277f, 1.000f);
+    colors[ImGuiCol_ScrollbarGrabHovered]   = ImVec4(0.300f, 0.300f, 0.300f, 1.000f);
+    colors[ImGuiCol_ScrollbarGrabActive]    = ImVec4(1.000f, 0.391f, 0.000f, 1.000f);
+    colors[ImGuiCol_CheckMark]              = ImVec4(1.000f, 1.000f, 1.000f, 1.000f);
+    colors[ImGuiCol_SliderGrab]             = ImVec4(0.391f, 0.391f, 0.391f, 1.000f);
+    colors[ImGuiCol_SliderGrabActive]       = ImVec4(1.000f, 0.391f, 0.000f, 1.000f);
+    colors[ImGuiCol_Button]                 = ImVec4(1.000f, 1.000f, 1.000f, 0.000f);
+    colors[ImGuiCol_ButtonHovered]          = ImVec4(1.000f, 1.000f, 1.000f, 0.156f);
+    colors[ImGuiCol_ButtonActive]           = ImVec4(1.000f, 1.000f, 1.000f, 0.391f);
+    colors[ImGuiCol_Header]                 = ImVec4(0.313f, 0.313f, 0.313f, 1.000f);
+    colors[ImGuiCol_HeaderHovered]          = ImVec4(0.469f, 0.469f, 0.469f, 1.000f);
+    colors[ImGuiCol_HeaderActive]           = ImVec4(0.469f, 0.469f, 0.469f, 1.000f);
+    colors[ImGuiCol_Separator]              = colors[ImGuiCol_Border];
+    colors[ImGuiCol_SeparatorHovered]       = ImVec4(0.391f, 0.391f, 0.391f, 1.000f);
+    colors[ImGuiCol_SeparatorActive]        = ImVec4(1.000f, 0.391f, 0.000f, 1.000f);
+    colors[ImGuiCol_ResizeGrip]             = ImVec4(1.000f, 1.000f, 1.000f, 0.250f);
+    colors[ImGuiCol_ResizeGripHovered]      = ImVec4(1.000f, 1.000f, 1.000f, 0.670f);
+    colors[ImGuiCol_ResizeGripActive]       = ImVec4(1.000f, 0.391f, 0.000f, 1.000f);
+    colors[ImGuiCol_Tab]                    = ImVec4(0.152f, 0.152f, 0.152f, 1.000f);
+    colors[ImGuiCol_TabHovered]             = ImVec4(0.352f, 0.352f, 0.352f, 1.000f);
+    colors[ImGuiCol_TabActive]              = ImVec4(0.195f, 0.195f, 0.195f, 1.000f);
+    colors[ImGuiCol_TabUnfocused]           = ImVec4(0.098f, 0.098f, 0.098f, 1.000f);
+    colors[ImGuiCol_TabUnfocusedActive]     = ImVec4(0.195f, 0.195f, 0.195f, 1.000f);
+    colors[ImGuiCol_DockingPreview]         = ImVec4(1.000f, 0.391f, 0.000f, 0.781f);
+    colors[ImGuiCol_DockingEmptyBg]         = ImVec4(0.180f, 0.180f, 0.180f, 1.000f);
+    colors[ImGuiCol_PlotLines]              = ImVec4(0.469f, 0.469f, 0.469f, 1.000f);
+    colors[ImGuiCol_PlotLinesHovered]       = ImVec4(1.000f, 0.391f, 0.000f, 1.000f);
+    colors[ImGuiCol_PlotHistogram]          = ImVec4(0.586f, 0.586f, 0.586f, 1.000f);
+    colors[ImGuiCol_PlotHistogramHovered]   = ImVec4(1.000f, 0.391f, 0.000f, 1.000f);
+    colors[ImGuiCol_TextSelectedBg]         = ImVec4(1.000f, 1.000f, 1.000f, 0.156f);
+    colors[ImGuiCol_DragDropTarget]         = ImVec4(1.000f, 0.391f, 0.000f, 1.000f);
+    colors[ImGuiCol_NavHighlight]           = ImVec4(1.000f, 0.391f, 0.000f, 1.000f);
+    colors[ImGuiCol_NavWindowingHighlight]  = ImVec4(1.000f, 0.391f, 0.000f, 1.000f);
+    colors[ImGuiCol_NavWindowingDimBg]      = ImVec4(0.000f, 0.000f, 0.000f, 0.586f);
+    colors[ImGuiCol_ModalWindowDimBg]       = ImVec4(0.000f, 0.000f, 0.000f, 0.586f);
+
+    style->ChildRounding = 8.0f;
+    style->FrameBorderSize = 1.0f;
+    style->FrameRounding = 4.0f;
+    style->GrabMinSize = 7.0f;
+    style->PopupRounding = 2.0f;
+    style->ScrollbarRounding = 12.0f;
+    style->ScrollbarSize = 13.0f;
+    style->TabBorderSize = 1.0f;
+    style->TabRounding = 0.0f;
+    style->WindowRounding = 4.0f;
+}
+
+namespace font_manager {
+    font_manager::fonts_storage fonts;
+}
 
 int main(int, char**)
 {
@@ -400,7 +466,8 @@ int main(int, char**)
 		SDL_WINDOWPOS_CENTERED,
 		1280,
 		720,
-		SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+		SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_POPUP_MENU);
+    SDL_SetWindowIcon(window, SDL_LoadBMP("/Users/kivicode/Documents/GitHub/NodeNet/planning/icon.bmp"));
 	SDL_GLContext gl_context = SDL_GL_CreateContext(window);
 	SDL_GL_MakeCurrent(window, gl_context);
 	SDL_GL_SetSwapInterval(1); // Enable vsync
@@ -413,6 +480,7 @@ int main(int, char**)
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
+    ImPlot::CreateContext();
 
 	ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
 	ImGui_ImplOpenGL3_Init(glsl_version);
@@ -423,8 +491,7 @@ int main(int, char**)
 	ImGui::StyleColorsDark();
 	imnodes::StyleColorsCustomDark();
 
-	ImGui::GetIO().Fonts->AddFontFromFileTTF("fonts/Roboto/Roboto-Regular.ttf", 16.0f);
-	graphics::NodeEditorLoadFonts();
+    graphics::NodeEditorLoadFonts();
 
 	bool done = false;
 	bool initialized = false;
@@ -450,7 +517,7 @@ int main(int, char**)
 		}
 
 		// Start the Dear ImGui frame
-        setStyleDark();
+        setStyleDarkUI();
         ImGui::GetStyle().WindowBorderSize = 0.0f;
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
@@ -464,6 +531,7 @@ int main(int, char**)
 		ImGui::NewFrame();
 
 
+        ImGui::PushFont(font_manager::fonts.editorFont);
 
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar;
 
@@ -485,18 +553,21 @@ int main(int, char**)
             ImGui::DockBuilderAddNode(dockspace_id, dockspace_flags); // Add empty node
             ImGui::DockBuilderSetNodeSize(dockspace_id, {viewport->GetWorkSize().x, viewport->GetWorkSize().y});
 
-            ImGuiID dock_main_id = dockspace_id;
+            ImGuiID dock_main_id = dockspace_id, r;
 
-            ImGuiID dock_id_left   = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left,  0.15f, nullptr, &dock_main_id);
-            ImGuiID dock_id_right  = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.20f, nullptr, &dock_main_id);
-            ImGuiID dock_id_bottom = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down,  0.20f, nullptr, &dock_main_id);
-            ImGuiID dock_id_center = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Up,    0.20f, nullptr, &dock_main_id);
+            ImGuiID dock_id_bottom  = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down,  0.25f, nullptr, &dock_main_id);
+            ImGuiID dock_id_left    = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left,  0.15f, nullptr, &dock_main_id);
+            ImGuiID dock_id_right   = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.20f, nullptr, &dock_main_id);
+            ImGuiID dock_id_rdown   = ImGui::DockBuilderSplitNode(dock_id_right,ImGuiDir_Up,  0.55f, nullptr, &dock_id_right);
+            ImGuiID dock_id_center  = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Up,    0.20f, nullptr, &dock_main_id);
 
             ImGui::DockBuilderDockWindow("Code Editor",   dock_id_center); // editor
             ImGui::DockBuilderDockWindow("Nodes",         dock_id_center); // editor
+            ImGui::DockBuilderDockWindow("Plot",          dock_id_center); // editor
             ImGui::DockBuilderDockWindow("Log",           dock_id_bottom); // bottom
             ImGui::DockBuilderDockWindow("Code",          dock_id_bottom); // bottom
-            ImGui::DockBuilderDockWindow("Inspector",     dock_id_left);   // left
+            ImGui::DockBuilderDockWindow("Node Tree",     dock_id_left);   // left
+            ImGui::DockBuilderDockWindow("Inspector",     dock_id_rdown);   // left
             ImGui::DockBuilderDockWindow("Configuration", dock_id_right);  // right
             ImGui::DockBuilderDockWindow("Settings",      dock_id_right);  // right
             ImGui::DockBuilderFinish(dockspace_id);
@@ -548,6 +619,7 @@ int main(int, char**)
 
 		graphics::NodeEditorShow();
 
+		ImGui::PopFont();
 		// Rendering
 		ImGui::Render();
 
@@ -565,6 +637,7 @@ int main(int, char**)
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplSDL2_Shutdown();
+    ImPlot::DestroyContext();
 	ImGui::DestroyContext();
 
 	SDL_GL_DeleteContext(gl_context);

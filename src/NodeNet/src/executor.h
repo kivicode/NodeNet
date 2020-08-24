@@ -82,7 +82,7 @@ namespace CodeExecutor {
         return output;
     }
 
-    std::string getDeclarationSegment(std::string code) {
+    std::string getDeclarationSegment(const std::string& code) {
         std::stringstream ss(code);
         std::string block, line;
         std::smatch sm;
@@ -90,7 +90,7 @@ namespace CodeExecutor {
         return sm.str().substr(1, sm.str().length()-1-2);
     }
 
-    CodeIODeclaration getInCodeIODeclarations(std::string code, std::string targetRegex, std::string realToken) {
+    CodeIODeclaration getInCodeIODeclarations(const std::string& code, const std::string& targetRegex, const std::string& realToken) {
         CodeIODeclaration result(code);
 
         const std::regex regex(targetRegex);
@@ -127,7 +127,7 @@ namespace CodeExecutor {
         return result;
     }
 
-    NodeIOPin processSignleDeclarationLine(std::string line) { // pin, found
+    NodeIOPin processSingleDeclarationLine(std::string line) { // pin, found
         if (countChar(line, ' ') == 0)  line = line.append(" ");
 
         std::stringstream ss(line);
@@ -140,7 +140,7 @@ namespace CodeExecutor {
 
         bool trigDefaultOption = false;
         bool lock = false;
-        std::string default_option = "";
+        std::string default_option;
 
 
         for (std::string part : paramList) {
@@ -159,16 +159,16 @@ namespace CodeExecutor {
                 else if (val == "float_drag")  result.dataType = SliderDataType::FLOAT_DRAG;
                 else if (val == "string_list") result.dataType = SliderDataType::STRING_SELECTOR;
             }
-            if (param == "min_val")    result.minSliderVal = std::atof(val.c_str());
-            if (param == "max_val")    result.maxSliderVal = std::atof(val.c_str());
-            if (param == "drag_speed") result.sliderSpeed  = std::atof(val.c_str());
+            if (param == "min_val")    result.minSliderVal = std::strtof(val.c_str(), nullptr);
+            if (param == "max_val")    result.maxSliderVal = std::strtof(val.c_str(), nullptr);
+            if (param == "drag_speed") result.sliderSpeed  = std::strtof(val.c_str(), nullptr);
 
             if (param == "lock" && val == "true") {lock = true;}
             else if (param == "lock")             {lock = false;}
 
             if (param == "options") {
                 val = val.substr(1, val.size()-2);
-                for (std::string option : split(val, ',')) {
+                for (std::string& option : split(val, ',')) {
                     result.options.push_back(option);
                 }
             }
@@ -194,7 +194,7 @@ namespace CodeExecutor {
         std::vector<NodeIOPin> inputs, outputs;
         for(const std::string& line : split(code, '\n')) {
             if (line.empty() || line == "\n" || line == "\t" || line == " ") continue;
-            NodeIOPin pin = processSignleDeclarationLine(line);
+            NodeIOPin pin = processSingleDeclarationLine(line);
             if (pin.isInput) { inputs.push_back(pin); }
             else { outputs.push_back(pin); }
         }
@@ -224,7 +224,21 @@ namespace CodeExecutor {
             if (line.at(0) == '@') {
                 if (line.substr(1, line.size()) == "start_node")  result.type = START;
                 if (line.substr(1, line.size()) == "finish_node") result.type = FINISH;
-                declarationSegment = declarationSegment.substr(line.size()+2, declarationSegment.size());
+                if (line.substr(1, 5) == "color") {
+                    std::string decl = split(line.substr(1, line.size()), '(').at(1);
+                    decl = split(decl, ')').at(0);
+                    replaceAll(decl, " ", "");
+                    replaceAll(decl, "\t", "");
+                    auto colorComponents = split(decl, ',');
+                    std::cout << colorComponents.size() << "\n";
+                    if (colorComponents.size() != 3) continue; // only 3-color rgb format accepted
+                    for(int i = 0; i < 3; i++) {
+                        result.headColor[i] = std::strtof(colorComponents.at(i).c_str(), nullptr) / 255.f;
+                    }
+                    std::cout << colorComponents[0] << ", " << colorComponents[1] << ", " << colorComponents[2] << "\n";
+                }
+                std::cout << declarationSegment << "\n";
+                replaceAll(declarationSegment, line, "");
             }
         }
 

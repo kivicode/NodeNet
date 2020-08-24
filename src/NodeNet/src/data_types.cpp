@@ -29,7 +29,6 @@ NodeIOPin::NodeIOPin(std::string name, bool isEditable, float minSliderVal, floa
 
 
 /* ========== NODE CONFIG ========== */
-
 NodeConfig::NodeConfig(std::string title, std::vector<NodeIOPin> inputs, std::vector<NodeIOPin> outputs) : title(std::move(title)), inputs(std::move(inputs)), outputs(std::move(outputs)) {}
 
 void NodeConfig::setCode(std::string newCode) {
@@ -93,7 +92,6 @@ int Node::inputIdByName(std::string& name) {
 
 std::any Node::getInputValueById(Editor &editor, int localIndex) {
     if (this->config.inputs[localIndex].name == LINK_PIN_TEXT) {
-        std::cout << this->id << std::endl;
         auto val = Node::getPrevVarname(editor, editor.getLinkToPin(*this, localIndex));
 #ifdef DEBUG
         std::cout << "Found staff pin: " << this->config.inputs[localIndex].name << " With val: " << val << " ID: " << this->inputIds[localIndex] << "\n";
@@ -206,8 +204,6 @@ void Node::replaceInputsWithValues(Editor& editor) {
                 else if (val.type() == typeid(int)) stringVal = std::to_string(std::any_cast<int>(val));
             }
 
-            if(name == "Link") std::cout << this->inputIdByName(name) << "    " << stringVal << "\n";
-
             // replace input statement with it's actual value
             line.erase(pos - L, endPos - (pos - L) + 2);
             line.insert(pos - L, stringVal);
@@ -269,9 +265,9 @@ bool Node::hasName(Editor& editor) {
     if (this->_type == START) {
         nameId = this->inputIds[0];
     } else {
-        std::cout << "INP_TITLE: " << this->config.title << "\n";
-        std::cout << "INP_SIZE: "  << this->inputIds.size() << "\n";
-        std::cout << "INP_ID: "    << this->_type << ", " << START << ", " << CUSTOM << ", " << FINISH << "\n";
+//        std::cout << "INP_TITLE: " << this->config.title << "\n";
+//        std::cout << "INP_SIZE: "  << this->inputIds.size() << "\n";
+//        std::cout << "INP_ID: "    << this->_type << ", " << START << ", " << CUSTOM << ", " << FINISH << "\n";
         nameId = this->inputIds[1];
     }
     return !std::string(this->inputs[nameId].s).empty() || editor.pinHasLink(nameId);
@@ -450,10 +446,10 @@ bool Editor::pinHasLink(int pinId) {
     return false;
 }
 
-Node Editor::nodeById(int id) {
+Node& Editor::nodeById(int id) {
     auto iter = std::find_if(this->nodes.begin(), this->nodes.end(),
                              [id](const Node &node) -> bool { return node.id == id; });
-    Node outp = *iter;
+    Node& outp = *iter;
     if (iter == this->nodes.end()) outp._type = NULL_NODE;
     return outp;
 }

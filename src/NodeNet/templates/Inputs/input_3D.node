@@ -1,6 +1,7 @@
 <%
 Input (3D)
 @start_node
+@color(225, 85, 84)
 input name=Name   type=string
 input name=Width  type=int
 input name=Height type=int
@@ -8,4 +9,5 @@ input name=Depth  type=int
 %>
 
 input("Name") = Input(shape=(input("Width"), input("Height"), input("Depth")))
+
 
