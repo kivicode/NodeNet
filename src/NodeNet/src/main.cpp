@@ -10,6 +10,7 @@
 #include "fonts.h"
 #include "include/implot/implot.h"
 
+
 static ImVector<ImRect> s_GroupPanelLabelStack;
 
 void ImGui::BeginGroupPanel(const char* name, const ImVec2& size)
@@ -429,8 +430,11 @@ namespace font_manager {
     font_manager::fonts_storage fonts;
 }
 
+
 int main(int, char**)
 {
+
+
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
 	{
 		printf("Error: %s\n", SDL_GetError());

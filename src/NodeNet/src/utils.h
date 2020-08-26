@@ -99,6 +99,7 @@ int* shiftPtr(int *ptr, int shift) {
 #include <algorithm>
 #include <string>
 #include <cctype>
+#include <sstream>
 
 bool findStringIC(const std::string & strHaystack, const std::string & strNeedle) { //// Ignore case search
     auto it = std::search(
@@ -107,6 +108,16 @@ bool findStringIC(const std::string & strHaystack, const std::string & strNeedle
             [](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2); }
     );
     return (it != strHaystack.end() );
+}
+
+std::vector<std::string> split(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    std::stringstream ss(s);
+    std::string part;
+    while(std::getline(ss, part, delim)) {
+        elems.push_back(part);
+    }
+    return elems;
 }
 
 #endif //NODENET_UTILS_H

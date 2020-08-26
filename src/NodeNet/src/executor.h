@@ -58,16 +58,6 @@ namespace CodeExecutor {
         return -1;
     }
 
-    std::vector<std::string> split(const std::string &s, char delim) {
-        std::vector<std::string> elems;
-        std::stringstream ss(s);
-        std::string part;
-        while(std::getline(ss, part, delim)) {
-            elems.push_back(part);
-        }
-        return elems;
-    }
-
     std::vector<std::pair<bool, std::array<int, 3>>> getIOCodePositionsAndLengths( const std::string& baseCode) { // <bool, {int, int, int}> ==> <isInput, {line number, character index (inside the line), substring length}>
 
         std::vector<std::pair<bool, std::array<int, 3>>> output = {};

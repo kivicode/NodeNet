@@ -16,6 +16,7 @@
 #include "TextEditor.h"
 #include "include/implot/implot.cpp"
 
+#include <Python.h>
 
 namespace fs = std::filesystem;
 
@@ -292,7 +293,7 @@ namespace graphics {
             std::vector<ImPlotPoint> vals = {};
             std::vector<float> xx = {};
             for(float i = 0; i < 10; i+=0.1) {
-                vals.push_back({i, exp(i)});
+                vals.emplace_back(i, exp(i));
             }
             ImPlot::PlotLine("loss", vals.data(), vals.size());
             ImPlot::PlotLine("acc", vals.data(), vals.size());

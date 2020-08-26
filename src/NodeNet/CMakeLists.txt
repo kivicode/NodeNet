@@ -7,9 +7,7 @@ find_package(SDL2 REQUIRED)
 
 include_directories(NodeNet ${SDL2_INCLUDE_DIRS})
 
-set(CMAKE_CXX_FLAGS "-F/Library/Frameworks -framework SDL2 -framework CoreFoundation -stdlib=libc++")
-
-#find_package(implot)
+set(CMAKE_CXX_FLAGS "-F/Library/Frameworks -framework SDL2 -framework CoreFoundation -stdlib=libc++ -L/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/config-3.6m-darwin -lpython3.6m -ldl -framework CoreFoundation -I/Library/Frameworks/Python.framework/Versions/3.6/include/python3.6m -I/Library/Frameworks/Python.framework/Versions/3.6/include/python3.6m -fno-strict-aliasing -Wsign-compare -fno-common -dynamic -DNDEBUG -g -fwrapv -O3 -Wall -Wstrict-prototypes -g")
 
 
 include_directories(.)
@@ -55,8 +53,8 @@ add_executable(NodeNet
         src/main.cpp
         src/editor.h
         src/editor.cpp
-        src/tinyfiledialogs.c
-        src/tinyfiledialogs.h
+        include/tinyfiledialogs.c
+        include/tinyfiledialogs.h
         imnodes.cpp
         imnodes.h
         Makefile src/data_types.cpp

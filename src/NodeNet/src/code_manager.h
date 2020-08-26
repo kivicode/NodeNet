@@ -78,7 +78,7 @@ private:
 
     void generateDatasetLoader() {
         this->code += "def load_dataset():\n";
-        this->code += "\treturn np.array([[0,0], [0,1], [1,1]]), np.array([0, 1, 0]), [], []\n";
+        this->code += "\treturn np.array([i for i in range(8)]), np.array([0, 1]*4), [], []\n";
     }
 };
 
