@@ -1,6 +1,6 @@
 #include "editor.h"
 #include "generator.cpp"
-#include "executor.h"
+#include "ThreadsManager.h"
 #include "dataset_manager.h"
 #include "trainer.h"
 #include "code_manager.h"
@@ -536,7 +536,7 @@ namespace graphics {
     }
 
     void debug(){
-
+        trainer.train(editor, codeManager, codeManager.fileSavePath);
     }
 
     void debug_save() {
@@ -602,8 +602,9 @@ namespace graphics {
         show_code_editor();
         show_plot();
         show_editor("Nodes", editor);
-
-//        debug();
+        if(!pythonThreadAlive && pythonThread.joinable()) {
+            pythonThread.join();
+        }
     }
 
     void NodeEditorShutdown() {

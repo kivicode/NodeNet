@@ -19,7 +19,7 @@
 #include <thread>
 
 #include <unistd.h>
-
+#include "ThreadsManager.h"
 
 
 std::string getFileName(const std::string& path) {
@@ -36,7 +36,7 @@ std::string getParentDir(const std::string& path) {
     return out;
 }
 
-std::string generateInjectedFile(const std::string& basePath, const std::string& injectionPath) {
+inline std::string generateInjectedFile(const std::string& basePath, const std::string& injectionPath) {
     auto code = readFile(basePath);
     auto injection = readFile(injectionPath);
     auto fullCode = injection + "\n\n" + code;
@@ -49,32 +49,38 @@ std::string generateInjectedFile(const std::string& basePath, const std::string&
     return moduleName[moduleName.size()-2]; // TODO: Add Win delimiter support (universal delimiter)
 }
 
-PyObject* loadTrainer(const std::string& moduleName) {
+inline PyObject* loadTrainer(const std::string& moduleName) {
     PyObject *trainer_str = PyUnicode_FromString(moduleName.c_str());
-    return PyImport_ReloadModule(PyImport_Import(trainer_str));
+    auto outp = PyImport_Import(trainer_str);
+    return outp;
 }
 
-bool abc = 0;
 void test_run() {
-    abc = 2;
     if (PyImport_AppendInittab("nodespy", PyInit_nodespy) == -1) {
         fprintf(stderr, "Error: could not extend in-built modules table\n");
         exit(1);
     }
 
-
     Py_Initialize();
+    while (true) {
 
-    auto moduleName   = generateInjectedFile("/Users/kivicode/Documents/GitHub/NodeNet/src/NodeNet/py/test.py", "/Users/kivicode/Documents/GitHub/NodeNet/src/NodeNet/py/injection.py");
-    std::cout << "Model path: " << moduleName << "\n";
-    PyObject *trainer = loadTrainer(moduleName);
+        auto moduleName = generateInjectedFile("/Users/kivicode/Documents/GitHub/NodeNet/src/NodeNet/py/test.py",
+                                               "/Users/kivicode/Documents/GitHub/NodeNet/src/NodeNet/py/injection.py");
+        std::cout << "Model path: " << moduleName << "\n";
+        PyObject *trainer = loadTrainer(moduleName);
 
-    PyObject *load  = PyObject_GetAttrString(trainer, (char *) "load_dataset");
-    PyObject *train = PyObject_GetAttrString(trainer, (char *) "train");
+        PyObject *load = PyObject_GetAttrString(trainer, (char *) "load_dataset");
+        PyObject *train = PyObject_GetAttrString(trainer, (char *) "train");
 
-    PyObject_CallObject(load,  nullptr);
-    PyObject_CallObject(train, nullptr);
+        PyObject_CallObject(load, nullptr);
+        PyObject_CallObject(train, nullptr);
 
+
+        if (!pythonThreadAlive) break;
+        pythonThreadPaused = true;
+        while (pythonThreadPaused);
+
+    }
     Py_Finalize();
 }
 
@@ -94,17 +100,21 @@ public:
     explicit MlTrainer(Logger* logTarget): logTarget(logTarget){}
 
     bool train(Editor& editor, CodeManager& codeManager, const std::string& filePath) {
-        codeManager.optimizer = availableOptimizers.at(selectedOptimizer);
-        codeManager.generateCode(editor);
-        codeManager.save();
+//        codeManager.optimizer = availableOptimizers.at(selectedOptimizer);
+//        codeManager.generateCode(editor);
+//        codeManager.save();
         return this->start_exec(pythonPath + " " + filePath);
     }
 
     bool start_exec(const std::string& command) {
-        std::thread t(test_run);
-        usleep(2000000);
-        std::cout << "\n\n\n\n\nsdsdjogsfp[kfogp\n\n\n" << abc << "\n";
-        t.join();
+        if (!pythonThreadIninted) {
+            printf("\n\n\nStart thread\n\n\n\n");
+            pythonThread = std::thread(test_run);
+            pythonThreadIninted = true;
+        }
+        pythonThreadPaused = false;
+        printf("\n\n\nUnpause thread\n\n\n\n");
+
         return true;
     }
 
