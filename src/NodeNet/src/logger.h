@@ -33,7 +33,7 @@ public:
 
     void log(const string& msg, LogLevel level) {
         ScrollToBottom = true;
-        this->target->append(getPrefix(level) + msg + (level == NONE ? "" : "\n"));
+        this->target->append(getPrefix(level) + msg + "\n");
     }
 
     void log(const string& msg) {

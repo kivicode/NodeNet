@@ -6,6 +6,7 @@
 #include "code_manager.h"
 #include "logger.h"
 #include "exceptions.h"
+#include "plotter.h"
 
 #include <imnodes.h>
 #include <imgui.h>
@@ -47,6 +48,7 @@ namespace graphics {
     TextEditor codeEditor, codePreview;
     Logger console(&consoleLogString);
     Logger codeConsole(&consoleCodeString);
+    Plotter plotter;
 
     MlTrainer trainer(&codeConsole);
     DatasetManager dataset;
@@ -289,16 +291,8 @@ namespace graphics {
     void show_plot() {
         ImGui::Begin("Plot");
 
-        if(ImPlot::BeginPlot("Training")) {
-            std::vector<ImPlotPoint> vals = {};
-            std::vector<float> xx = {};
-            for(float i = 0; i < 10; i+=0.1) {
-                vals.emplace_back(i, exp(i));
-            }
-            ImPlot::PlotLine("loss", vals.data(), vals.size());
-            ImPlot::PlotLine("acc", vals.data(), vals.size());
-            ImPlot::EndPlot();
-        }
+        plotter.render();
+
         ImGui::End();
     }
 
@@ -589,6 +583,8 @@ namespace graphics {
 
         imnodes::IO& io = imnodes::GetIO();
         io.link_detach_with_modifier_click.modifier = &ImGui::GetIO().KeyCtrl;
+        spyLogger.setLogger(&console);
+        spyLogger.setPlotter(&plotter);
     }
 
     void NodeEditorShow() {

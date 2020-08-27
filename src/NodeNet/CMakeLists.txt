@@ -75,6 +75,6 @@ add_executable(NodeNet
         src/code_manager.h
         src/logger.h
         src/exceptions.h
-        src/serializerTest.h src/fonts.h src/ThreadsManager.h)
+        src/serializerTest.h src/fonts.h src/ThreadsManager.h src/plotter.h)
 
 target_link_libraries(NodeNet ${SDL2_LIBRARIES})

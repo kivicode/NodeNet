@@ -8,8 +8,9 @@
 #include <thread>
 
 std::thread pythonThread;
-bool pythonThreadIninted = false;
-bool pythonThreadAlive   = true;
-bool pythonThreadPaused  = false;
+bool pythonThreadIninted   = false;
+bool pythonThreadAlive     = true;
+bool pythonThreadCycleDone = false;
+bool pythonThreadPaused    = false;
 
 #endif //NODENET_THREADSMANAGER_H

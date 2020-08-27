@@ -62,7 +62,7 @@ private:
     std::string code;
 
     void generateHeader() {
-        for(std::string import : this->imports) this->code.append(import + "\n");
+        for(const std::string& import : this->imports) this->code.append(import + "\n");
     }
 
     void generateBody() {

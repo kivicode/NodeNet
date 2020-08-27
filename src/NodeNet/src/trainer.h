@@ -55,35 +55,6 @@ inline PyObject* loadTrainer(const std::string& moduleName) {
     return outp;
 }
 
-void test_run() {
-    if (PyImport_AppendInittab("nodespy", PyInit_nodespy) == -1) {
-        fprintf(stderr, "Error: could not extend in-built modules table\n");
-        exit(1);
-    }
-
-    Py_Initialize();
-    while (true) {
-
-        auto moduleName = generateInjectedFile("/Users/kivicode/Documents/GitHub/NodeNet/src/NodeNet/py/test.py",
-                                               "/Users/kivicode/Documents/GitHub/NodeNet/src/NodeNet/py/injection.py");
-        std::cout << "Model path: " << moduleName << "\n";
-        PyObject *trainer = loadTrainer(moduleName);
-
-        PyObject *load = PyObject_GetAttrString(trainer, (char *) "load_dataset");
-        PyObject *train = PyObject_GetAttrString(trainer, (char *) "train");
-
-        PyObject_CallObject(load, nullptr);
-        PyObject_CallObject(train, nullptr);
-
-
-        if (!pythonThreadAlive) break;
-        pythonThreadPaused = true;
-        while (pythonThreadPaused);
-
-    }
-    Py_Finalize();
-}
-
 
 class MlTrainer {
 
@@ -109,16 +80,45 @@ public:
     bool start_exec(const std::string& command) {
         if (!pythonThreadIninted) {
             printf("\n\n\nStart thread\n\n\n\n");
-            pythonThread = std::thread(test_run);
+            pythonThread = std::thread(run);
             pythonThreadIninted = true;
         }
         pythonThreadPaused = false;
         printf("\n\n\nUnpause thread\n\n\n\n");
-
         return true;
     }
 
     void exec_step() {
+    }
+
+private:
+
+    static void run() {
+        if (PyImport_AppendInittab("nodespy", PyInit_nodespy) == -1) {
+            fprintf(stderr, "Error: could not extend in-built modules table\n");
+            exit(1);
+        }
+
+        Py_Initialize();
+        while (true) {
+
+            auto moduleName = generateInjectedFile("/Users/kivicode/Documents/GitHub/NodeNet/src/NodeNet/py/test.py",
+                                                   "/Users/kivicode/Documents/GitHub/NodeNet/src/NodeNet/py/injection.py");
+            std::cout << "Model path: " << moduleName << "\n";
+            PyObject *trainer = loadTrainer(moduleName);
+
+            PyObject *load = PyObject_GetAttrString(trainer, (char *) "load_dataset");
+            PyObject *train = PyObject_GetAttrString(trainer, (char *) "train");
+
+            PyObject_CallObject(load, nullptr);
+            PyObject_CallObject(train, nullptr);
+
+            if (!pythonThreadAlive) break;
+            pythonThreadPaused = true;
+
+            while (pythonThreadPaused) {std::this_thread::sleep_for(std::chrono::microseconds(10));}
+        }
+        Py_Finalize();
     }
 
 };
