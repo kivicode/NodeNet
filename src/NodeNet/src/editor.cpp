@@ -1,12 +1,12 @@
 #include "editor.h"
-#include "generator.cpp"
-#include "ThreadsManager.h"
-#include "dataset_manager.h"
-#include "trainer.h"
-#include "code_manager.h"
-#include "logger.h"
-#include "exceptions.h"
-#include "plotter.h"
+#include "src/Core/generator.cpp"
+#include "src/Core/ThreadsManager.h"
+#include "src/Net/dataset_manager.h"
+#include "src/Net/trainer.h"
+#include "src/Net/code_manager.h"
+#include "src/Log/logger.h"
+#include "src/Core/exceptions.h"
+#include "src/Log/plotter.h"
 
 #include <imnodes.h>
 #include <imgui.h>

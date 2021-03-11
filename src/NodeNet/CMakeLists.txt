@@ -7,7 +7,7 @@ find_package(SDL2 REQUIRED)
 
 include_directories(NodeNet ${SDL2_INCLUDE_DIRS})
 
-set(CMAKE_CXX_FLAGS "-F/Library/Frameworks -framework SDL2 -framework CoreFoundation -stdlib=libc++ -L/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/config-3.6m-darwin -lpython3.6m -ldl -framework CoreFoundation -I/Library/Frameworks/Python.framework/Versions/3.6/include/python3.6m -I/Library/Frameworks/Python.framework/Versions/3.6/include/python3.6m -fno-strict-aliasing -Wsign-compare -fno-common -dynamic -DNDEBUG -g -fwrapv -O3 -Wall -Wstrict-prototypes -g")
+#set(CMAKE_CXX_FLAGS "-F/Library/Frameworks -framework SDL2 -framework CoreFoundation -stdlib=libc++ -L/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/config-3.6m-darwin -lpython3.6m -ldl -framework CoreFoundation -I/Library/Frameworks/Python.framework/Versions/3.6/include/python3.6m -I/Library/Frameworks/Python.framework/Versions/3.6/include/python3.6m -fno-strict-aliasing -Wsign-compare -fno-common -dynamic -DNDEBUG -g -fwrapv -O3 -Wall -Wstrict-prototypes -g")
 
 
 include_directories(.)
@@ -57,24 +57,24 @@ add_executable(NodeNet
         include/tinyfiledialogs.h
         imnodes.cpp
         imnodes.h
-        Makefile src/data_types.cpp
+        Makefile src/Core/data_types.cpp
         ${SOURCES}
-        src/generator.cpp
+        src/Core/generator.cpp
         src/settings.h
-        src/utils.cpp
-        src/executor.h
-        src/templates.h
-        src/generator.h
-        src/utils.h
-        src/data_types.h
-        src/executor.cpp
-        src/trainer.cpp
-        src/trainer.h
-        src/dataset_manager.cpp
-        src/dataset_manager.h
-        src/code_manager.h
-        src/logger.h
-        src/exceptions.h
-        src/serializerTest.h src/fonts.h src/ThreadsManager.h src/plotter.h)
+        src/Core/utils.cpp
+        src/Generation/executor.h
+        src/Debug/templates.h
+        src/Core/generator.h
+        src/Core/utils.h
+        src/Core/data_types.h
+        src/Generation/executor.cpp
+        src/Net/trainer.cpp
+        src/Net/trainer.h
+        src/Net/dataset_manager.cpp
+        src/Net/dataset_manager.h
+        src/Net/code_manager.h
+        src/Log/logger.h
+        src/Core/exceptions.h
+        src/fonts.h src/Core/ThreadsManager.h src/Log/plotter.h)
 
 target_link_libraries(NodeNet ${SDL2_LIBRARIES})
